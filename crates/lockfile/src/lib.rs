@@ -276,7 +276,7 @@ pub fn compute_config_hash(
     env_vec.sort_by_key(|(k, _)| *k);
     config.insert("env", env_vec.iter().map(|(k, v)| format!("{}={}", k, v)).collect::<Vec<_>>().join("\n"));
 
-    let serialized = serde_json::to_string(&config).unwrap();
+    let serialized = serde_json::to_string(&config).expect("lockfile config serialization should always succeed");
     sha256_hash(&serialized)
 }
 

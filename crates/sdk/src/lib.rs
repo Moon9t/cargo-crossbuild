@@ -89,7 +89,7 @@ impl SdkManager {
         let mut files = Vec::new();
         for file in &metadata.files {
             let path = self.cache_dir.join("packages").join(&file.path);
-            std::fs::create_dir_all(path.parent().unwrap())?;
+            std::fs::create_dir_all(path.parent().expect("file path inside packages/ has parent directory"))?;
             self.download_file(file.path.to_str().unwrap_or_default(), &path, &file.hash)?;
             files.push(path);
         }

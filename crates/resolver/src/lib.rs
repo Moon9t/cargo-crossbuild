@@ -216,9 +216,11 @@ impl Resolver {
             }
 
             // Acquire semaphore for parallelism control
-            let permit = self.task_semaphore.clone().acquire_owned().await.unwrap();
+            let permit = self.task_semaphore.clone().acquire_owned().await.expect("semaphore should not be closed");
 
-            let task = graph.get_task(&task_id).unwrap();
+            let task = graph.get_task(&task_id).ok_or_else(|| {
+                crossbuild_core::CrossBuildError::configuration(format!("task {task_id} not found in execution graph"))
+            })?;
             let step = task.step.clone();
 
             let task_id_clone = task_id.clone();

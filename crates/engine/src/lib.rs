@@ -72,7 +72,7 @@ impl CrossBuildEngine {
         // Write cargo config if present
         if let Some(config_toml) = &plan.cargo_config {
             let config_path = plan.manifest_directory().join(".cargo").join("config.toml");
-            std::fs::create_dir_all(config_path.parent().unwrap())
+            std::fs::create_dir_all(config_path.parent().expect("config path .cargo/config.toml always has parent"))
                 .map_err(|e| CrossBuildError::Io {
                     path: Some(config_path.clone()),
                     source: e,

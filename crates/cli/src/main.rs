@@ -146,7 +146,7 @@ fn cmd_build(args: BuildArgs) -> Result<()> {
         println!("  Cache key: {}", plan.cache_key);
         if let Some(ref config_toml) = plan.cargo_config {
             println!("  Cargo config:");
-            println!("{}", toml::to_string_pretty(config_toml).unwrap());
+            println!("{}", toml::to_string_pretty(config_toml).expect("config serialization should always succeed"));
         }
     } else {
         let report = engine

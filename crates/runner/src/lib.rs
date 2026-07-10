@@ -59,8 +59,8 @@ impl Runner {
         })?;
 
         // Capture and forward output
-        let stdout = child.stdout.take().unwrap();
-        let stderr = child.stderr.take().unwrap();
+        let stdout = child.stdout.take().expect("stdout was piped at spawn");
+        let stderr = child.stderr.take().expect("stderr was piped at spawn");
 
         let collected: Arc<Mutex<Vec<Diagnostic>>> = Arc::new(Mutex::new(Vec::new()));
 
@@ -71,7 +71,7 @@ impl Runner {
             for line in reader.lines() {
                 if let Ok(line) = line {
                     if !line.trim().is_empty() {
-                        out_diags.lock().unwrap().push(Diagnostic::info("CB1010", line));
+                        out_diags.lock().expect("diagnostic lock not poisoned").push(Diagnostic::info("CB1010", line));
                     }
                 }
             }
@@ -84,7 +84,7 @@ impl Runner {
             for line in reader.lines() {
                 if let Ok(line) = line {
                     if !line.trim().is_empty() {
-                        err_diags.lock().unwrap().push(Diagnostic::warning("CB1011", line));
+                        err_diags.lock().expect("diagnostic lock not poisoned").push(Diagnostic::warning("CB1011", line));
                     }
                 }
             }
@@ -95,7 +95,7 @@ impl Runner {
         let _ = stdout_handle.join();
         let _ = stderr_handle.join();
 
-        for diag in collected.lock().unwrap().drain(..) {
+        for diag in collected.lock().expect("diagnostic lock not poisoned").drain(..) {
             sink.emit(diag);
         }
 
