@@ -1,0 +1,6 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/cargo-crossbuild-core",
+    "crates/cargo-crossbuild-cli",
+]
