@@ -106,7 +106,7 @@ impl CrossBuildEngine {
         &self,
         request: BuildRequest,
         config: &CrossBuildConfig,
-        sink: &mut dyn DiagnosticSink,
+        _sink: &mut dyn DiagnosticSink,
     ) -> Result<BuildPlan, CrossBuildError> {
         let mut dry_request = request;
         dry_request.execution_mode = crossbuild_core::model::ExecutionMode::DryRun;

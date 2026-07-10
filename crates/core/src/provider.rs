@@ -478,7 +478,7 @@ impl ToolchainProvider for BuiltinToolchainProvider {
     fn resolve(
         &self,
         _target: &TargetTriple,
-        host: &HostInfo,
+        _host: &HostInfo,
         _request: &BuildRequest,
     ) -> Result<ToolchainResolution, CrossBuildError> {
         Ok(ToolchainResolution::new()
@@ -582,7 +582,7 @@ impl SysrootProvider for ZigSysrootProvider {
         _host: &HostInfo,
         _request: &BuildRequest,
     ) -> Result<SysrootResolution, CrossBuildError> {
-        let zig_path = which::which("zig").map_err(|_| CrossBuildError::ToolNotFound {
+        let _ = which::which("zig").map_err(|_| CrossBuildError::ToolNotFound {
             tool: "zig".to_string(),
         })?;
 
@@ -630,6 +630,7 @@ impl SysrootProvider for NoSysrootProvider {
     }
 }
 
+#[allow(dead_code)]
 /// Checks if a target is available via rustup.
 fn is_rustup_target_available(target: &TargetTriple) -> bool {
     // Check common rustup targets

@@ -10,6 +10,7 @@ use std::time::{Duration, Instant};
 /// Telemetry collector for cross-build operations.
 pub struct TelemetryCollector {
     start_time: Instant,
+    #[allow(dead_code)]
     target: TargetTriple,
     metadata: BTreeMap<String, String>,
     events: Vec<TelemetryEvent>,

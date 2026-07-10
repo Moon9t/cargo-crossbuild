@@ -262,7 +262,7 @@ mod tests {
         fn can_provide(&self, _target: &TargetTriple, _host: &crate::model::HostInfo) -> bool { true }
         fn resolve(
             &self,
-            target: &TargetTriple,
+            _target: &TargetTriple,
             _host: &crate::model::HostInfo,
             _request: &BuildRequest,
         ) -> Result<crate::provider::LinkerResolution, CrossBuildError> {

@@ -33,6 +33,7 @@ impl InstallPlan {
 
 /// Package manager for cross-compilation dependencies.
 pub struct PackageManager {
+    #[allow(dead_code)]
     config: CrossBuildConfig,
 }
 

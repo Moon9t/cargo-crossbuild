@@ -320,7 +320,7 @@ impl Downloader {
         }
     }
 
-    fn finalize_checksum(&self, hasher: Box<dyn ChecksumHasher>, algorithm: ChecksumAlgorithm) -> String {
+    fn finalize_checksum(&self, hasher: Box<dyn ChecksumHasher>, _algorithm: ChecksumAlgorithm) -> String {
         hasher.finalize()
     }
 
@@ -416,7 +416,6 @@ impl ChecksumHasher for Blake3Hasher {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::tempdir;
 
     #[test]
     fn download_request_creation() {

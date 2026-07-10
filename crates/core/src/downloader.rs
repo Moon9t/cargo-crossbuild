@@ -300,7 +300,7 @@ impl Downloader {
         url: &str,
         cache_key: &str,
         expected_checksum: Option<&str>,
-        algorithm: ChecksumAlgorithm,
+        _algorithm: ChecksumAlgorithm,
     ) -> Result<DownloadResult, CrossBuildError> {
         let dest = self.cache_policy.download_dir(&PathBuf::from("."))
             .join(cache_key);
@@ -320,7 +320,7 @@ impl Downloader {
         }
     }
 
-    fn finalize_checksum(&self, hasher: Box<dyn ChecksumHasher>, algorithm: ChecksumAlgorithm) -> String {
+    fn finalize_checksum(&self, hasher: Box<dyn ChecksumHasher>, _algorithm: ChecksumAlgorithm) -> String {
         hasher.finalize()
     }
 
@@ -416,8 +416,6 @@ impl ChecksumHasher for Blake3Hasher {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::tempdir;
-
     #[test]
     fn download_request_creation() {
         let req = DownloadRequest::new("https://example.com/file", "/tmp/file");

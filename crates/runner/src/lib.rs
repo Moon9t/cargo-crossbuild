@@ -122,7 +122,6 @@ impl Runner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crossbuild_core::diagnostics::StderrDiagnosticSink;
     use crossbuild_core::model::{BuildPlan, BuildRequest, CommandLine, ExecutionMode, PlanStep, TargetTriple};
     use std::path::PathBuf;
 

@@ -174,6 +174,7 @@ impl ExecutionGraph {
 
 /// Resolver that executes the build plan.
 pub struct Resolver {
+    #[allow(dead_code)]
     max_parallelism: usize,
     task_semaphore: Arc<Semaphore>,
 }
@@ -191,8 +192,8 @@ impl Resolver {
     pub async fn resolve(
         &self,
         plan: &BuildPlan,
-        config: &CrossBuildConfig,
-        sink: &mut dyn crossbuild_core::diagnostics::DiagnosticSink,
+        _config: &CrossBuildConfig,
+        _sink: &mut dyn crossbuild_core::diagnostics::DiagnosticSink,
     ) -> Result<RunReport, crossbuild_core::CrossBuildError> {
         let graph = ExecutionGraph::from_plan(plan)?;
         let order = graph.topological_order();

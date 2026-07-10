@@ -218,7 +218,7 @@ impl Default for Planner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crossbuild_core::model::{BuildRequest, TargetTriple, ExecutionMode};
+    use crossbuild_core::model::{BuildRequest, TargetTriple};
     use tempfile::tempdir;
 
     #[test]

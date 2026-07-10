@@ -336,7 +336,7 @@ impl CacheManager {
                     .collect();
                 entries.sort_by_key(|(_, last_accessed, _, _)| *last_accessed);
 
-                for (key, _, size, path) in entries {
+                for (key, _, _size, path) in entries {
                     if self.metadata.total_size_bytes <= max_size {
                         break;
                     }

@@ -8,6 +8,7 @@ use crossbuild_core::config::CrossBuildConfig;
 
 /// SDK manager for acquiring and managing cross-compilation dependencies.
 pub struct SdkManager {
+    #[allow(dead_code)]
     config: CrossBuildConfig,
     cache_dir: PathBuf,
     installed_packages: BTreeMap<String, InstalledPackage>,
@@ -155,7 +156,7 @@ impl SdkManager {
     }
 
     /// Extracts a package archive.
-    fn extract_package(&self, metadata: &PackageMetadata, files: &[PathBuf]) -> Result<PathBuf> {
+    fn extract_package(&self, metadata: &PackageMetadata, _files: &[PathBuf]) -> Result<PathBuf> {
         let install_dir = self.cache_dir.join("installed").join(&metadata.name).join(&metadata.version);
         std::fs::create_dir_all(&install_dir)?;
 
@@ -221,8 +222,8 @@ impl PackageRegistry {
         self.sources.sort_by_key(|s| -s.priority);
     }
 
-    pub fn find_package(&self, name: &str, version: &str, target: &crossbuild_core::model::TargetTriple) -> Option<PackageMetadata> {
-        for source in &self.sources {
+    pub fn find_package(&self, _name: &str, _version: &str, _target: &crossbuild_core::model::TargetTriple) -> Option<PackageMetadata> {
+        for _source in &self.sources {
             // In real implementation, query the source
             // For now return None
         }
@@ -235,7 +236,6 @@ mod tests {
     use super::*;
     use crossbuild_core::config::CrossBuildConfig;
     use crossbuild_core::model::TargetTriple;
-    use tempfile::tempdir;
 
     #[test]
     fn sdk_manager_creation() {
@@ -248,8 +248,6 @@ mod tests {
     fn package_installation() {
         let config = CrossBuildConfig::default();
         let mut manager = SdkManager::new(config).unwrap();
-
-        let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
 
         // Test installing a package (will use mock metadata)
         let result = manager.install_package("openssl", "1.1.1", &TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap());
