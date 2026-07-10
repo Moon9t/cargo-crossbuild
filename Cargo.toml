@@ -27,6 +27,16 @@ members = [
     "crates/wrappers",
 ]
 
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Moon9t/cargo-crossbuild"
+homepage = "https://github.com/Moon9t/cargo-crossbuild"
+documentation = "https://docs.rs/crossbuild-core"
+keywords = ["cross-compilation", "build-tools", "toolchain"]
+categories = ["development-tools::build-utils"]
+
 [workspace.dependencies]
 anyhow = { version = "1.0", features = ["backtrace"] }
 serde = { version = "1.0", features = ["derive"] }

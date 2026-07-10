@@ -6,7 +6,7 @@ use std::process::Command;
 use anyhow::{Context, Result};
 use crossbuild_core::{
     config::CrossBuildConfig,
-    model::{TargetTriple, ValidationPlan, WrapperPlan},
+    model::TargetTriple,
 };
 
 /// Describes a planned installation destination.
@@ -267,6 +267,8 @@ impl ReleasePlan {
 mod tests {
     use super::*;
     use crossbuild_core::model::TargetTriple;
+    use crossbuild_core::WrapperPlan;
+    use crossbuild_core::ValidationPlan;
 
     #[test]
     fn install_plan_creation() {

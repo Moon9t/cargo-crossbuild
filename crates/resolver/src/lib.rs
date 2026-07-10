@@ -1,16 +1,15 @@
-use std::collections::{BTreeMap, HashMap, HashSet};
-use std::path::PathBuf;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
 use crossbuild_core::{
-    model::{BuildPlan, BuildRequest, RunReport, TargetTriple, PlanStep},
-    CrossBuildConfig, CrossBuildError,
+    model::{BuildPlan, RunReport, PlanStep},
+    CrossBuildConfig,
 };
 use tokio::sync::Semaphore;
 use tokio::task::JoinSet;
-use tracing::{debug, info, warn};
+use tracing::{debug, info};
 
 /// A task in the execution graph.
 #[derive(Debug, Clone)]
@@ -201,7 +200,7 @@ impl Resolver {
         info!("Executing {} tasks in topological order", order.len());
 
         let mut join_set = JoinSet::new();
-        let mut completed: HashSet<String> = HashSet::new();
+        let completed: HashSet<String> = HashSet::new();
 
         for task_id in order {
             // Wait for dependencies to complete
@@ -285,6 +284,7 @@ impl Resolver {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn execution_graph_creation() {

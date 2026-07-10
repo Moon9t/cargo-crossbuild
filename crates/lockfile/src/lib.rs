@@ -282,7 +282,7 @@ pub fn compute_config_hash(
 
 /// Computes SHA256 hash of a string.
 fn sha256_hash(input: &str) -> String {
-    use sha2::{Digest, Sha256};
+    use sha2::Digest;
     let mut hasher = sha2::Sha256::new();
     hasher.update(input.as_bytes());
     hex::encode(hasher.finalize())

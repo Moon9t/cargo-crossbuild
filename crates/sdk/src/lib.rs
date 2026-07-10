@@ -4,10 +4,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
-use crossbuild_core::{
-    model::TargetTriple,
-    config::CrossBuildConfig,
-};
+use crossbuild_core::config::CrossBuildConfig;
 
 /// SDK manager for acquiring and managing cross-compilation dependencies.
 pub struct SdkManager {
@@ -141,7 +138,7 @@ impl SdkManager {
         let bytes = response.bytes()?;
 
         // Verify hash
-        use sha2::{Digest, Sha256};
+        use sha2::Digest;
         let mut hasher = sha2::Sha256::new();
         hasher.update(&bytes);
         let hash = hex::encode(hasher.finalize());

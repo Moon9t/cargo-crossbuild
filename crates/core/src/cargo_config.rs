@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use crate::model::{BuildRequest, TargetTriple};
+use crate::model::TargetTriple;
 use crate::error::CrossBuildError;
 
 /// Generates a .cargo/config.toml for cross-compilation.
@@ -26,7 +26,7 @@ impl CargoConfigGenerator {
     /// Sets the linker for the target.
     pub fn with_linker(mut self, linker_path: impl Into<PathBuf>, flavor: &str, args: Vec<String>) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
-        let mut target_table = self.get_or_create_target_table(&target_key);
+        let target_table = self.get_or_create_target_table(&target_key);
 
         target_table.insert("linker".to_string(), toml::Value::String(linker_path.into().to_string_lossy().into_owned()));
         target_table.insert("linker-flavor".to_string(), toml::Value::String(flavor.to_string()));
@@ -43,7 +43,7 @@ impl CargoConfigGenerator {
     /// Sets the runner for the target (for running tests).
     pub fn with_runner(mut self, runner: impl Into<String>) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
-        let mut target_table = self.get_or_create_target_table(&target_key);
+        let target_table = self.get_or_create_target_table(&target_key);
         target_table.insert("runner".to_string(), toml::Value::String(runner.into()));
         self
     }
@@ -51,7 +51,7 @@ impl CargoConfigGenerator {
     /// Sets custom rustflags for the target.
     pub fn with_rustflags(mut self, flags: Vec<String>) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
-        let mut target_table = self.get_or_create_target_table(&target_key);
+        let target_table = self.get_or_create_target_table(&target_key);
         target_table.insert("rustflags".to_string(), toml::Value::Array(
             flags.into_iter().map(toml::Value::String).collect()
         ));
@@ -65,7 +65,7 @@ impl CargoConfigGenerator {
         }
 
         let target_key = format!("target.{}", self.target.as_str());
-        let mut target_table = self.get_or_create_target_table(&target_key);
+        let target_table = self.get_or_create_target_table(&target_key);
         let mut env_table = toml::Table::new();
         for (k, v) in env {
             env_table.insert(k, toml::Value::String(v));
@@ -77,7 +77,7 @@ impl CargoConfigGenerator {
     /// Sets the sysroot for the target.
     pub fn with_sysroot(mut self, sysroot: impl Into<PathBuf>) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
-        let mut target_table = self.get_or_create_target_table(&target_key);
+        let target_table = self.get_or_create_target_table(&target_key);
         target_table.insert("sysroot".to_string(), toml::Value::String(sysroot.into().to_string_lossy().into_owned()));
         self
     }
@@ -85,7 +85,7 @@ impl CargoConfigGenerator {
     /// Adds a custom [target.xxx] section.
     pub fn with_custom_section(mut self, key: String, value: toml::Value) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
-        let mut target_table = self.get_or_create_target_table(&target_key);
+        let target_table = self.get_or_create_target_table(&target_key);
         target_table.insert(key, value);
         self
     }

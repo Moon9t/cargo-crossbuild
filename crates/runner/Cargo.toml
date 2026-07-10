@@ -1,7 +1,13 @@
 [package]
 name = "crossbuild-runner"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Build plan executor that invokes cargo with configured environment"
+keywords.workspace = true
+categories.workspace = true
 
 [dependencies]
 crossbuild-core = { path = "../core" }

@@ -1,10 +1,9 @@
-use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use anyhow::Result;
 use crossbuild_core::{
     error::CrossBuildError,
-    model::{Abi, Architecture, HostInfo, LinkerHint, OperatingSystem, TargetFamily, TargetTriple},
+    model::{Abi, Architecture, HostInfo, TargetFamily, TargetTriple},
     provider::{LinkerFlavor, LinkerProvider, LinkerResolution},
 };
 

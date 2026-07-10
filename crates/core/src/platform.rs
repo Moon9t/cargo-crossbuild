@@ -1,11 +1,10 @@
 //! Host and target platform detection, capability assessment, and toolchain routing.
 
 use std::collections::BTreeMap;
-use std::path::PathBuf;
 
 use crate::model::{
-    Abi, Architecture, HostDetectError, HostInfo, LinkerHint, OperatingSystem, SysrootHint,
-    TargetFamily, TargetInfo, TargetSupport, TargetTriple, ToolchainHint, Vendor,
+    Abi, HostDetectError, HostInfo, LinkerHint, OperatingSystem, SysrootHint,
+    TargetFamily, TargetInfo, TargetSupport, TargetTriple, ToolchainHint,
 };
 
 /// Detects the host platform information.

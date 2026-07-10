@@ -7,8 +7,8 @@ use crate::{
     config::CrossBuildConfig,
     error::CrossBuildError,
     model::{
-        BuildPlan, BuildRequest, CommandLine, ExecutionMode, HostInfo,
-        PlanStep, Profile, ProviderAction, TargetInfo, TargetTriple,
+        BuildPlan, BuildRequest, CommandLine,
+        PlanStep, Profile, ProviderAction, TargetTriple,
     },
     platform::{assess_target, detect_host},
     registry::ProviderRegistry,

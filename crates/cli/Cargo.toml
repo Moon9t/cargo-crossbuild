@@ -1,7 +1,13 @@
 [package]
 name = "cargo-crossbuild-cli"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "CLI frontend for cargo-crossbuild, the cross-compilation toolchain manager"
+keywords.workspace = true
+categories.workspace = true
 
 [dependencies]
 crossbuild-core = { path = "../core" }

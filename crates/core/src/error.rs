@@ -1,7 +1,5 @@
 //! Error types for `cargo-crossbuild`.
 
-use std::error::Error;
-use std::fmt::{self, Display, Formatter};
 use std::io;
 use std::path::PathBuf;
 use which;

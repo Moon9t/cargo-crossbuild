@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::fmt::{self, Display, Formatter};
 use std::fs;
-use std::io::{self, Read, Write};
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 

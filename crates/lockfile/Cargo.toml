@@ -1,7 +1,13 @@
 [package]
 name = "crossbuild-lockfile"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Lockfile management for reproducible cross-builds"
+keywords.workspace = true
+categories.workspace = true
 
 [dependencies]
 crossbuild-core = { path = "../core" }
@@ -10,7 +16,7 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 hex = { workspace = true }
-chrono = { version = "0.4", features = ["serde"] }
+chrono = { workspace = true, features = ["serde"] }
 toml = { workspace = true }
 
 [dev-dependencies]

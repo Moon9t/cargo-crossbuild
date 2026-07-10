@@ -1,11 +1,8 @@
 //! Diagnostics system for crossbuild.
 
-use std::collections::BTreeMap;
 use std::fmt::{self, Display, Formatter};
 use std::io::{self, Write};
 
-use anyhow::Result;
-use crate::error::CrossBuildError;
 
 /// Diagnostic severity used by the engine and CLI.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

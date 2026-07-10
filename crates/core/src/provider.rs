@@ -1,12 +1,10 @@
 //! Provider implementations for toolchain, sysroot, and linker resolution.
 
 use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::path::PathBuf;
 
 use crate::{
-    model::{Abi, Architecture, BuildRequest, HostInfo, LinkerHint, OperatingSystem,
-            SysrootHint, TargetFamily, TargetTriple, ToolchainHint},
+    model::{Abi, Architecture, BuildRequest, HostInfo, OperatingSystem, TargetFamily, TargetTriple, ToolchainHint},
     error::CrossBuildError,
 };
 
@@ -591,7 +589,7 @@ impl SysrootProvider for ZigSysrootProvider {
         // Zig doesn't have a separate sysroot - it uses its internal libc
         let sysroot = std::env::temp_dir().join("zig-sysroot").join(&target.triple);
 
-        let mut resolution = SysrootResolution::new(sysroot)
+        let resolution = SysrootResolution::new(sysroot)
             .with_note("Using zig's built-in libc/sysroot")
             .with_env("ZIG_SYSROOT", "1");
 

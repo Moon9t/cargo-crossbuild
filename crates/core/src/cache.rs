@@ -6,9 +6,8 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
-use crate::model::TargetTriple;
 use crate::error::CrossBuildError;
-use sha2::{Digest, Sha256};
+use sha2::Digest;
 
 /// Cache policy configuration.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
