@@ -10,9 +10,9 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-crossbuild-core = { path = "../core" }
-crossbuild-planner = { path = "../planner" }
-crossbuild-runner = { path = "../runner" }
+crossbuild-core = { path = "../core", version = "1.0.0" }
+crossbuild-planner = { path = "../planner", version = "1.0.0" }
+crossbuild-runner = { path = "../runner", version = "1.0.0" }
 toml = { workspace = true }
 
 [dev-dependencies]

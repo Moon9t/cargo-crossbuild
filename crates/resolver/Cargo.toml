@@ -10,10 +10,10 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-crossbuild-core = { path = "../core" }
-crossbuild-cache = { path = "../cache" }
-crossbuild-downloader = { path = "../downloader" }
-crossbuild-installer = { path = "../installer" }
+crossbuild-core = { path = "../core", version = "1.0.0" }
+crossbuild-cache = { path = "../cache", version = "1.0.0" }
+crossbuild-downloader = { path = "../downloader", version = "1.0.0" }
+crossbuild-installer = { path = "../installer", version = "1.0.0" }
 anyhow = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }

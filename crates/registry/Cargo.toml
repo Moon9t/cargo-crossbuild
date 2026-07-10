@@ -10,12 +10,12 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-crossbuild-core = { path = "../core" }
-crossbuild-provider-zig = { path = "../providers/zig" }
-crossbuild-provider-gcc = { path = "../providers/gcc" }
-crossbuild-provider-clang = { path = "../providers/clang" }
-crossbuild-provider-msvc = { path = "../providers/msvc" }
-crossbuild-provider-sysroot = { path = "../providers/sysroot" }
+crossbuild-core = { path = "../core", version = "1.0.0" }
+crossbuild-provider-zig = { path = "../providers/zig", version = "1.0.0" }
+crossbuild-provider-gcc = { path = "../providers/gcc", version = "1.0.0" }
+crossbuild-provider-clang = { path = "../providers/clang", version = "1.0.0" }
+crossbuild-provider-msvc = { path = "../providers/msvc", version = "1.0.0" }
+crossbuild-provider-sysroot = { path = "../providers/sysroot", version = "1.0.0" }
 anyhow = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

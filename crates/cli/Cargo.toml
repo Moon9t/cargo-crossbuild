@@ -10,8 +10,8 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-crossbuild-core = { path = "../core" }
-crossbuild-engine = { path = "../engine" }
+crossbuild-core = { path = "../core", version = "1.0.0" }
+crossbuild-engine = { path = "../engine", version = "1.0.0" }
 clap = { workspace = true, features = ["derive"] }
 clap_complete = { workspace = true }
 anyhow = { workspace = true }

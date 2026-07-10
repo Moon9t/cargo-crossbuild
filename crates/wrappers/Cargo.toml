@@ -10,4 +10,4 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-crossbuild-core = { path = "../core" }
+crossbuild-core = { path = "../core", version = "1.0.0" }

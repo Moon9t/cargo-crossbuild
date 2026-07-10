@@ -10,8 +10,8 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-crossbuild-core = { path = "../core" }
-crossbuild-toolchain = { path = "../toolchain" }
+crossbuild-core = { path = "../core", version = "1.0.0" }
+crossbuild-toolchain = { path = "../toolchain", version = "1.0.0" }
 anyhow = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

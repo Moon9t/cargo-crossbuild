@@ -10,8 +10,8 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-crossbuild-core = { path = "../core" }
-crossbuild-environment = { path = "../environment" }
-crossbuild-wrappers = { path = "../wrappers" }
+crossbuild-core = { path = "../core", version = "1.0.0" }
+crossbuild-environment = { path = "../environment", version = "1.0.0" }
+crossbuild-wrappers = { path = "../wrappers", version = "1.0.0" }
 anyhow = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
