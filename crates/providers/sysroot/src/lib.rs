@@ -101,8 +101,12 @@ impl SysrootProvider for RustupSysrootProvider {
         }
 
         let rustup_home = std::env::var("RUSTUP_HOME")
-            .or_else(|_| std::env::var("HOME"))
-            .map(|h| PathBuf::from(h).join(".rustup"))
+            .map(PathBuf::from)
+            .or_else(|_| {
+                std::env::var("HOME")
+                    .or_else(|_| std::env::var("USERPROFILE"))
+                    .map(|h| PathBuf::from(h).join(".rustup"))
+            })
             .unwrap_or_else(|_| PathBuf::from("/rustup"));
 
         let toolchain = find_rustup_toolchain(&rustup_home.to_string_lossy())?;
