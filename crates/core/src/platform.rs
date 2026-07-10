@@ -403,11 +403,15 @@ mod tests {
     }
 
     #[test]
-    fn suggests_lld_for_cross_linux() {
+    fn suggests_linker_for_linux_target() {
         let host = detect_host().unwrap();
         let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
         let info = assess_target(&target, &host);
-        assert_eq!(info.linker_hint, LinkerHint::Lld);
+        if host.os == OperatingSystem::Linux {
+            assert_eq!(info.linker_hint, LinkerHint::SystemDefault);
+        } else {
+            assert_eq!(info.linker_hint, LinkerHint::Lld);
+        }
     }
 
     #[test]
