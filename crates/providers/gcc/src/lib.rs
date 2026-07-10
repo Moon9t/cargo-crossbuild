@@ -146,39 +146,55 @@ fn find_msvc_link(arch: &Architecture) -> Result<PathBuf, CrossBuildError> {
         }
     };
 
+    if let Some(path) = try_find_via_vs_installation(arch_dir) {
+        return Ok(path);
+    }
+
+    if let Ok(path) = which::which("link") {
+        return Ok(path);
+    }
+
+    Err(CrossBuildError::ToolNotFound {
+        tool: "MSVC link.exe (install Visual Studio or run from Developer Command Prompt)"
+            .to_string(),
+    })
+}
+
+fn try_find_via_vs_installation(arch_dir: &str) -> Option<PathBuf> {
     let program_files = std::env::var("ProgramFiles")
         .or_else(|_| std::env::var("ProgramFiles(x86)"))
-        .map_err(|_| CrossBuildError::ToolNotFound {
-            tool: "MSVC not found (Visual Studio not installed)".to_string(),
-        })?;
+        .ok()?;
 
-    let base = PathBuf::from(program_files)
-        .join("Microsoft Visual Studio")
-        .join("2022");
-
+    let vs_base = PathBuf::from(&program_files).join("Microsoft Visual Studio");
     let editions = ["Enterprise", "Professional", "Community", "BuildTools"];
+    let years = ["2022", "2019"];
 
-    for edition in &editions {
-        let link_path = base.join(edition).join("VC").join("Tools").join("MSVC");
+    for year in &years {
+        for edition in &editions {
+            let tools_dir = vs_base
+                .join(year)
+                .join(edition)
+                .join("VC")
+                .join("Tools")
+                .join("MSVC");
 
-        if let Ok(entries) = std::fs::read_dir(&link_path) {
-            for entry in entries.flatten() {
-                let path = entry
-                    .path()
-                    .join("bin")
-                    .join("Hostx64")
-                    .join(arch_dir)
-                    .join("link.exe");
-                if path.exists() {
-                    return Ok(path);
+            if let Ok(entries) = std::fs::read_dir(&tools_dir) {
+                for entry in entries.flatten() {
+                    let path = entry
+                        .path()
+                        .join("bin")
+                        .join(format!("Host{}", arch_dir))
+                        .join(arch_dir)
+                        .join("link.exe");
+                    if path.exists() {
+                        return Some(path);
+                    }
                 }
             }
         }
     }
 
-    Err(CrossBuildError::ToolNotFound {
-        tool: "MSVC link.exe".to_string(),
-    })
+    None
 }
 
 /// Zig linker provider (uses `zig cc` as a linker).

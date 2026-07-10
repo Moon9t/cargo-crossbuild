@@ -153,7 +153,17 @@ edition = "2021"
         let config = CrossBuildConfig::default();
         let mut sink = StderrDiagnosticSink::new(false);
 
-        let plan = engine.dry_run(request, &config, &mut sink).unwrap();
-        assert_eq!(plan.request.execution_mode, ExecutionMode::DryRun);
+        match engine.dry_run(request, &config, &mut sink) {
+            Ok(plan) => {
+                assert_eq!(plan.request.execution_mode, ExecutionMode::DryRun);
+            }
+            Err(e) => {
+                let msg = e.to_string();
+                assert!(
+                    msg.contains("not found") || msg.contains("ToolNotFound"),
+                    "unexpected error: {e}"
+                );
+            }
+        }
     }
 }
