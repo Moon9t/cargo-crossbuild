@@ -4,8 +4,8 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crossbuild_core::model::TargetTriple;
 use crossbuild_core::error::CrossBuildError;
+use crossbuild_core::model::TargetTriple;
 
 /// Lockfile for reproducible cross-builds.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -80,8 +80,9 @@ impl Lockfile {
             path: Some(path.as_ref().to_path_buf()),
             source,
         })?;
-        serde_json::from_str(&content)
-            .map_err(|e| CrossBuildError::LockfileCorrupted { reason: e.to_string() })
+        serde_json::from_str(&content).map_err(|e| CrossBuildError::LockfileCorrupted {
+            reason: e.to_string(),
+        })
     }
 
     /// Computes the cache key for this lockfile.
@@ -99,7 +100,10 @@ impl Lockfile {
     ) -> Result<(), CrossBuildError> {
         if self.target != target.triple {
             return Err(CrossBuildError::LockfileCorrupted {
-                reason: format!("target mismatch: expected {}, got {}", target.triple, self.target),
+                reason: format!(
+                    "target mismatch: expected {}, got {}",
+                    target.triple, self.target
+                ),
             });
         }
 
@@ -252,8 +256,8 @@ pub fn compute_manifest_hash(manifest_path: impl AsRef<Path>) -> Result<String, 
     let manifest: toml::Value = toml::from_str(&content)
         .map_err(|e| CrossBuildError::configuration(format!("failed to parse manifest: {e}")))?;
 
-    let canonical = toml::to_string(&manifest)
-        .map_err(|e| CrossBuildError::configuration(e.to_string()))?;
+    let canonical =
+        toml::to_string(&manifest).map_err(|e| CrossBuildError::configuration(e.to_string()))?;
 
     Ok(sha256_hash(&canonical))
 }
@@ -274,9 +278,17 @@ pub fn compute_config_hash(
 
     let mut env_vec: Vec<_> = env_vars.iter().collect();
     env_vec.sort_by_key(|(k, _)| *k);
-    config.insert("env", env_vec.iter().map(|(k, v)| format!("{}={}", k, v)).collect::<Vec<_>>().join("\n"));
+    config.insert(
+        "env",
+        env_vec
+            .iter()
+            .map(|(k, v)| format!("{}={}", k, v))
+            .collect::<Vec<_>>()
+            .join("\n"),
+    );
 
-    let serialized = serde_json::to_string(&config).expect("lockfile config serialization should always succeed");
+    let serialized = serde_json::to_string(&config)
+        .expect("lockfile config serialization should always succeed");
     sha256_hash(&serialized)
 }
 
@@ -300,12 +312,14 @@ mod tests {
         let manager = LockfileManager::new(dir.path());
 
         let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
-        let lockfile = manager.create_lockfile(
-            &target,
-            "Cargo.toml",
-            "manifest-hash".to_string(),
-            "config-hash".to_string(),
-        ).unwrap();
+        let lockfile = manager
+            .create_lockfile(
+                &target,
+                "Cargo.toml",
+                "manifest-hash".to_string(),
+                "config-hash".to_string(),
+            )
+            .unwrap();
 
         assert_eq!(lockfile.target, "x86_64-unknown-linux-gnu");
         assert_eq!(lockfile.manifest_hash, "manifest-hash");
@@ -318,29 +332,23 @@ mod tests {
         let manager = LockfileManager::new(dir.path());
 
         let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
-        let _lockfile = manager.create_lockfile(
-            &target,
-            "Cargo.toml",
-            "manifest-hash".to_string(),
-            "config-hash".to_string(),
-        ).unwrap();
+        let _lockfile = manager
+            .create_lockfile(
+                &target,
+                "Cargo.toml",
+                "manifest-hash".to_string(),
+                "config-hash".to_string(),
+            )
+            .unwrap();
 
         // Should verify successfully
-        let verified = manager.verify_lockfile(
-            &target,
-            "Cargo.toml",
-            "manifest-hash",
-            "config-hash",
-        ).unwrap();
+        let verified = manager
+            .verify_lockfile(&target, "Cargo.toml", "manifest-hash", "config-hash")
+            .unwrap();
         assert_eq!(verified.target, "x86_64-unknown-linux-gnu");
 
         // Should fail on hash mismatch
-        let result = manager.verify_lockfile(
-            &target,
-            "Cargo.toml",
-            "wrong-hash",
-            "config-hash",
-        );
+        let result = manager.verify_lockfile(&target, "Cargo.toml", "wrong-hash", "config-hash");
         assert!(result.is_err());
     }
 
@@ -348,31 +356,40 @@ mod tests {
     fn manifest_hash() {
         let dir = tempdir().unwrap();
         let manifest = dir.path().join("Cargo.toml");
-        fs::write(&manifest, r#"
+        fs::write(
+            &manifest,
+            r#"
 [package]
 name = "test"
 version = "0.1.0"
 edition = "2021"
-"#).unwrap();
+"#,
+        )
+        .unwrap();
 
         let hash1 = compute_manifest_hash(&manifest).unwrap();
         let hash2 = compute_manifest_hash(&manifest).unwrap();
         assert_eq!(hash1, hash2);
 
         // Different content = different hash
-        fs::write(&manifest, r#"
+        fs::write(
+            &manifest,
+            r#"
 [package]
 name = "test"
 version = "0.2.0"
 edition = "2021"
-"#).unwrap();
+"#,
+        )
+        .unwrap();
         let hash3 = compute_manifest_hash(&manifest).unwrap();
         assert_ne!(hash1, hash3);
     }
 
     #[test]
     fn config_hash() {
-        let target = crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
+        let target =
+            crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
         let cargo_args = vec!["--release".to_string()];
         let mut env = BTreeMap::new();
         env.insert("CC".to_string(), "clang".to_string());

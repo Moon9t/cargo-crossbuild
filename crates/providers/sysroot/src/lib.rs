@@ -32,7 +32,9 @@ impl SysrootProvider for ZigSysrootProvider {
             tool: "zig".to_string(),
         })?;
 
-        let sysroot = std::env::temp_dir().join("zig-sysroot").join(&target.triple);
+        let sysroot = std::env::temp_dir()
+            .join("zig-sysroot")
+            .join(&target.triple);
 
         let resolution = SysrootResolution::new(sysroot)
             .with_note("Using zig's built-in libc/sysroot")
@@ -55,9 +57,7 @@ impl SysrootProvider for NoSysrootProvider {
     }
 
     fn can_provide(&self, target: &TargetTriple, host: &HostInfo) -> bool {
-        target.triple == host.host_triple.triple
-            || target.is_wasm()
-            || target.is_bare_metal()
+        target.triple == host.host_triple.triple || target.is_wasm() || target.is_bare_metal()
     }
 
     fn resolve(
@@ -66,8 +66,7 @@ impl SysrootProvider for NoSysrootProvider {
         _host: &HostInfo,
         _request: &BuildRequest,
     ) -> Result<SysrootResolution, CrossBuildError> {
-        Ok(SysrootResolution::new(PathBuf::new())
-            .with_note("No sysroot required for this target"))
+        Ok(SysrootResolution::new(PathBuf::new()).with_note("No sysroot required for this target"))
     }
 }
 
@@ -171,21 +170,26 @@ fn find_rustup_toolchain(rustup_home: &str) -> Result<String, CrossBuildError> {
         });
     }
 
-    let default_file = PathBuf::from(rustup_home).join("settings").join("default-toolchain");
+    let default_file = PathBuf::from(rustup_home)
+        .join("settings")
+        .join("default-toolchain");
     if default_file.exists() {
-        let content = std::fs::read_to_string(&default_file)
-            .map_err(|_| CrossBuildError::SysrootNotFound {
+        let content = std::fs::read_to_string(&default_file).map_err(|_| {
+            CrossBuildError::SysrootNotFound {
                 target: "rustup".to_string(),
-            })?;
+            }
+        })?;
         let toolchain = content.trim().to_string();
         if toolchains_dir.join(&toolchain).exists() {
             return Ok(toolchain);
         }
     }
 
-    for entry in std::fs::read_dir(&toolchains_dir).map_err(|_| CrossBuildError::SysrootNotFound {
-        target: "rustup".to_string(),
-    })? {
+    for entry in
+        std::fs::read_dir(&toolchains_dir).map_err(|_| CrossBuildError::SysrootNotFound {
+            target: "rustup".to_string(),
+        })?
+    {
         let entry = entry.map_err(|_| CrossBuildError::SysrootNotFound {
             target: "rustup".to_string(),
         })?;

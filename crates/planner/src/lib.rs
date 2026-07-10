@@ -6,10 +6,7 @@ use crossbuild_core::{
     cache::CacheManager,
     cargo_config::CargoConfigGenerator,
     config::CrossBuildConfig,
-    model::{
-        BuildPlan, BuildRequest, CachePolicy, CommandLine, PlanStep,
-        Profile,
-    },
+    model::{BuildPlan, BuildRequest, CachePolicy, CommandLine, PlanStep, Profile},
     platform::{assess_target, detect_host},
 };
 use crossbuild_registry::ProviderRegistry as Registry;
@@ -152,8 +149,12 @@ impl Planner {
 
         // Build steps
         let steps = vec![
-            PlanStep::ValidateManifest { path: manifest_path.clone() },
-            PlanStep::ValidateTarget { target: target_triple.clone() },
+            PlanStep::ValidateManifest {
+                path: manifest_path.clone(),
+            },
+            PlanStep::ValidateTarget {
+                target: target_triple.clone(),
+            },
             PlanStep::DetectHost,
             PlanStep::ResolveProviders,
             PlanStep::PrepareEnvironment,
@@ -166,7 +167,9 @@ impl Planner {
         ];
 
         // Generate cache key
-        let cache_key = cache_manager.policy().cache_key(&workspace_root, &target_triple);
+        let cache_key = cache_manager
+            .policy()
+            .cache_key(&workspace_root, &target_triple);
 
         Ok(BuildPlan {
             request: BuildRequest {
@@ -185,10 +188,11 @@ impl Planner {
 }
 
 fn normalize_manifest_path(path: &Path) -> Result<PathBuf, crossbuild_core::CrossBuildError> {
-    let metadata = std::fs::metadata(path).map_err(|source| crossbuild_core::CrossBuildError::Io {
-        path: Some(path.to_path_buf()),
-        source,
-    })?;
+    let metadata =
+        std::fs::metadata(path).map_err(|source| crossbuild_core::CrossBuildError::Io {
+            path: Some(path.to_path_buf()),
+            source,
+        })?;
 
     if metadata.is_dir() {
         let candidate = path.join("Cargo.toml");
@@ -232,12 +236,16 @@ mod tests {
         let planner = Planner::new();
         let dir = tempdir().unwrap();
         let manifest = dir.path().join("Cargo.toml");
-        std::fs::write(&manifest, r#"
+        std::fs::write(
+            &manifest,
+            r#"
 [package]
 name = "test"
 version = "0.1.0"
 edition = "2021"
-"#).unwrap();
+"#,
+        )
+        .unwrap();
 
         let host = detect_host().unwrap();
         let target = TargetTriple::parse(&host.host_triple.triple).unwrap();

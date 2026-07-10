@@ -146,7 +146,11 @@ fn cmd_build(args: BuildArgs) -> Result<()> {
         println!("  Cache key: {}", plan.cache_key);
         if let Some(ref config_toml) = plan.cargo_config {
             println!("  Cargo config:");
-            println!("{}", toml::to_string_pretty(config_toml).expect("config serialization should always succeed"));
+            println!(
+                "{}",
+                toml::to_string_pretty(config_toml)
+                    .expect("config serialization should always succeed")
+            );
         }
     } else {
         let report = engine
@@ -197,8 +201,14 @@ fn cmd_doctor() -> Result<()> {
     println!();
 
     println!("Environment:");
-    println!("  CARGO:                 {}", std::env::var("CARGO").unwrap_or_default());
-    println!("  CROSSBUILD_TARGET_DIR: {}", std::env::var("CROSSBUILD_TARGET_DIR").unwrap_or_default());
+    println!(
+        "  CARGO:                 {}",
+        std::env::var("CARGO").unwrap_or_default()
+    );
+    println!(
+        "  CROSSBUILD_TARGET_DIR: {}",
+        std::env::var("CROSSBUILD_TARGET_DIR").unwrap_or_default()
+    );
 
     Ok(())
 }
@@ -213,7 +223,10 @@ fn cmd_clean() -> Result<()> {
             .with_context(|| format!("failed to remove cache directory '{}'", root.display()))?;
         println!("Removed crossbuild cache: {}", root.display());
     } else {
-        println!("Crossbuild cache directory does not exist: {}", root.display());
+        println!(
+            "Crossbuild cache directory does not exist: {}",
+            root.display()
+        );
     }
 
     Ok(())

@@ -4,8 +4,8 @@ use std::collections::BTreeMap;
 use std::env;
 use std::path::{Path, PathBuf};
 
-use anyhow::Result;
 use crate::error::CrossBuildError;
+use anyhow::Result;
 
 /// Configuration loaded from environment and workspace defaults.
 #[derive(Debug, Clone, PartialEq, Eq)]

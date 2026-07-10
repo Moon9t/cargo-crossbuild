@@ -3,9 +3,9 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use crossbuild_core::{
-    model::{BuildPlan, ExecutionMode, RunReport},
-    error::CrossBuildError,
     diagnostics::{Diagnostic, DiagnosticSink},
+    error::CrossBuildError,
+    model::{BuildPlan, ExecutionMode, RunReport},
 };
 
 /// Executes build plans.
@@ -68,11 +68,12 @@ impl Runner {
         let stdout_handle = std::thread::spawn(move || {
             use std::io::{BufRead, BufReader};
             let reader = BufReader::new(stdout);
-            for line in reader.lines() {
-                if let Ok(line) = line {
-                    if !line.trim().is_empty() {
-                        out_diags.lock().expect("diagnostic lock not poisoned").push(Diagnostic::info("CB1010", line));
-                    }
+            for line in reader.lines().map_while(Result::ok) {
+                if !line.trim().is_empty() {
+                    out_diags
+                        .lock()
+                        .expect("diagnostic lock not poisoned")
+                        .push(Diagnostic::info("CB1010", line));
                 }
             }
         });
@@ -81,21 +82,28 @@ impl Runner {
         let stderr_handle = std::thread::spawn(move || {
             use std::io::{BufRead, BufReader};
             let reader = BufReader::new(stderr);
-            for line in reader.lines() {
-                if let Ok(line) = line {
-                    if !line.trim().is_empty() {
-                        err_diags.lock().expect("diagnostic lock not poisoned").push(Diagnostic::warning("CB1011", line));
-                    }
+            for line in reader.lines().map_while(Result::ok) {
+                if !line.trim().is_empty() {
+                    err_diags
+                        .lock()
+                        .expect("diagnostic lock not poisoned")
+                        .push(Diagnostic::warning("CB1011", line));
                 }
             }
         });
 
-        let status = child.wait().map_err(|source| CrossBuildError::Io { path: None, source })?;
+        let status = child
+            .wait()
+            .map_err(|source| CrossBuildError::Io { path: None, source })?;
 
         let _ = stdout_handle.join();
         let _ = stderr_handle.join();
 
-        for diag in collected.lock().expect("diagnostic lock not poisoned").drain(..) {
+        for diag in collected
+            .lock()
+            .expect("diagnostic lock not poisoned")
+            .drain(..)
+        {
             sink.emit(diag);
         }
 
@@ -122,7 +130,9 @@ impl Runner {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crossbuild_core::model::{BuildPlan, BuildRequest, CommandLine, ExecutionMode, PlanStep, TargetTriple};
+    use crossbuild_core::model::{
+        BuildPlan, BuildRequest, CommandLine, ExecutionMode, PlanStep, TargetTriple,
+    };
     use std::path::PathBuf;
 
     #[test]
@@ -131,7 +141,8 @@ mod tests {
             request: BuildRequest::new(
                 PathBuf::from("Cargo.toml"),
                 TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap(),
-            ).with_execution_mode(ExecutionMode::DryRun),
+            )
+            .with_execution_mode(ExecutionMode::DryRun),
             host: crossbuild_core::platform::detect_host().unwrap(),
             target: crossbuild_core::platform::assess_target(
                 &TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap(),

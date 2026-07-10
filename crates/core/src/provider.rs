@@ -4,8 +4,11 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use crate::{
-    model::{Abi, Architecture, BuildRequest, HostInfo, OperatingSystem, TargetFamily, TargetTriple, ToolchainHint},
     error::CrossBuildError,
+    model::{
+        Abi, Architecture, BuildRequest, HostInfo, OperatingSystem, TargetFamily, TargetTriple,
+        ToolchainHint,
+    },
 };
 
 /// A toolchain provider supplies the compiler toolchain for a target.
@@ -420,8 +423,10 @@ impl ToolchainProvider for ZigToolchainProvider {
 
     fn can_provide(&self, target: &TargetTriple, _host: &HostInfo) -> bool {
         // Zig can target most platforms
-        !matches!(target.family(), TargetFamily::Other | TargetFamily::BareMetal)
-            || target.is_wasm()
+        !matches!(
+            target.family(),
+            TargetFamily::Other | TargetFamily::BareMetal
+        ) || target.is_wasm()
     }
 
     fn resolve(
@@ -443,7 +448,10 @@ impl ToolchainProvider for ZigToolchainProvider {
             .with_env("CC", format!("zig cc -target {}", target_arg))
             .with_env("CXX", format!("zig c++ -target {}", target_arg))
             .with_env("AR", "zig ar")
-            .with_env("CARGO_TARGET_RUNNER", format!("zig cc -target {}", target_arg));
+            .with_env(
+                "CARGO_TARGET_RUNNER",
+                format!("zig cc -target {}", target_arg),
+            );
 
         // Add linker flags for zig
         resolution = resolution.with_env(
@@ -587,7 +595,9 @@ impl SysrootProvider for ZigSysrootProvider {
         })?;
 
         // Zig doesn't have a separate sysroot - it uses its internal libc
-        let sysroot = std::env::temp_dir().join("zig-sysroot").join(&target.triple);
+        let sysroot = std::env::temp_dir()
+            .join("zig-sysroot")
+            .join(&target.triple);
 
         let resolution = SysrootResolution::new(sysroot)
             .with_note("Using zig's built-in libc/sysroot")
@@ -610,9 +620,7 @@ impl SysrootProvider for NoSysrootProvider {
     }
 
     fn can_provide(&self, target: &TargetTriple, host: &HostInfo) -> bool {
-        target.triple == host.host_triple.triple
-            || target.is_wasm()
-            || target.is_bare_metal()
+        target.triple == host.host_triple.triple || target.is_wasm() || target.is_bare_metal()
     }
 
     fn resolve(
@@ -625,8 +633,7 @@ impl SysrootProvider for NoSysrootProvider {
             return Err(CrossBuildError::SysrootNotNeeded);
         }
 
-        Ok(SysrootResolution::new(PathBuf::new())
-            .with_note("No sysroot required for this target"))
+        Ok(SysrootResolution::new(PathBuf::new()).with_note("No sysroot required for this target"))
     }
 }
 
@@ -669,12 +676,15 @@ fn find_rustup_toolchain(rustup_home: &str) -> Result<String, CrossBuildError> {
     }
 
     // Read the default toolchain
-    let default_file = PathBuf::from(rustup_home).join("settings").join("default-toolchain");
+    let default_file = PathBuf::from(rustup_home)
+        .join("settings")
+        .join("default-toolchain");
     if default_file.exists() {
-        let content = std::fs::read_to_string(&default_file)
-            .map_err(|_| CrossBuildError::SysrootNotFound {
+        let content = std::fs::read_to_string(&default_file).map_err(|_| {
+            CrossBuildError::SysrootNotFound {
                 target: "rustup".to_string(),
-            })?;
+            }
+        })?;
         let toolchain = content.trim().to_string();
         if toolchains_dir.join(&toolchain).exists() {
             return Ok(toolchain);
@@ -682,9 +692,11 @@ fn find_rustup_toolchain(rustup_home: &str) -> Result<String, CrossBuildError> {
     }
 
     // Fallback: find first stable toolchain
-    for entry in std::fs::read_dir(&toolchains_dir).map_err(|_| CrossBuildError::SysrootNotFound {
-        target: "rustup".to_string(),
-    })? {
+    for entry in
+        std::fs::read_dir(&toolchains_dir).map_err(|_| CrossBuildError::SysrootNotFound {
+            target: "rustup".to_string(),
+        })?
+    {
         let entry = entry.map_err(|_| CrossBuildError::SysrootNotFound {
             target: "rustup".to_string(),
         })?;

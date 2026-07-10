@@ -1,10 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crossbuild_core::{
-    model::TargetTriple,
-    provider::LinkerFlavor,
-    error::CrossBuildError,
-};
+use crossbuild_core::{error::CrossBuildError, model::TargetTriple, provider::LinkerFlavor};
 
 /// Wrapper command configuration.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -136,7 +132,7 @@ impl WrapperGenerator {
                 script.push_str("\nexec ar \"$@\"\n");
             }
             "ld" => {
-                script.push_str(&format!("\nexec ld.lld \"$@\"\n"));
+                script.push_str("\nexec ld.lld \"$@\"\n");
             }
             _ => {
                 script.push_str(&format!("\nexec {} \"$@\"\n", name));
@@ -156,18 +152,12 @@ impl WrapperGenerator {
 /// Standard wrapper configurations.
 pub fn standard_wrappers(target: TargetTriple) -> Vec<WrapperConfig> {
     vec![
-        WrapperConfig::new("crossbuild-cc", target.to_string())
-            .with_flavor(LinkerFlavor::Gnu),
-        WrapperConfig::new("crossbuild-c++", target.to_string())
-            .with_flavor(LinkerFlavor::Gnu),
-        WrapperConfig::new("crossbuild-ar", target.to_string())
-            .with_flavor(LinkerFlavor::Gnu),
-        WrapperConfig::new("crossbuild-ld", target.to_string())
-            .with_flavor(LinkerFlavor::Gnu),
-        WrapperConfig::new("crossbuild-ranlib", target.to_string())
-            .with_flavor(LinkerFlavor::Gnu),
-        WrapperConfig::new("crossbuild-strip", target.to_string())
-            .with_flavor(LinkerFlavor::Gnu),
+        WrapperConfig::new("crossbuild-cc", target.to_string()).with_flavor(LinkerFlavor::Gnu),
+        WrapperConfig::new("crossbuild-c++", target.to_string()).with_flavor(LinkerFlavor::Gnu),
+        WrapperConfig::new("crossbuild-ar", target.to_string()).with_flavor(LinkerFlavor::Gnu),
+        WrapperConfig::new("crossbuild-ld", target.to_string()).with_flavor(LinkerFlavor::Gnu),
+        WrapperConfig::new("crossbuild-ranlib", target.to_string()).with_flavor(LinkerFlavor::Gnu),
+        WrapperConfig::new("crossbuild-strip", target.to_string()).with_flavor(LinkerFlavor::Gnu),
     ]
 }
 
@@ -210,7 +200,9 @@ mod tests {
             .with_toolchain_path("/opt/rust".into())
             .with_sysroot("/opt/sysroot".into());
 
-        let script = generator.generate_wrapper_script("cc", "x86_64-unknown-linux-gnu", LinkerFlavor::Gnu).unwrap();
+        let script = generator
+            .generate_wrapper_script("cc", "x86_64-unknown-linux-gnu", LinkerFlavor::Gnu)
+            .unwrap();
         assert!(script.contains("TARGET="));
         assert!(script.contains("SYSROOT="));
         assert!(script.contains("exec cc -target"));
@@ -220,7 +212,9 @@ mod tests {
     fn generates_ar_wrapper() {
         let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
         let generator = WrapperGenerator::new(target);
-        let script = generator.generate_wrapper_script("ar", "", LinkerFlavor::Gnu).unwrap();
+        let script = generator
+            .generate_wrapper_script("ar", "", LinkerFlavor::Gnu)
+            .unwrap();
         assert!(script.contains("exec ar"));
     }
 

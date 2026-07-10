@@ -89,9 +89,7 @@ impl LinkerProvider for MoldLinkerProvider {
 
     fn can_provide(&self, target: &TargetTriple, _host: &HostInfo) -> bool {
         let has_mold = which::which("mold").is_ok();
-        has_mold
-            && matches!(target.family(), TargetFamily::Linux)
-            && target.abi != Abi::Msvc
+        has_mold && matches!(target.family(), TargetFamily::Linux) && target.abi != Abi::Msvc
     }
 
     fn resolve(
@@ -161,15 +159,16 @@ fn find_msvc_link(arch: &Architecture) -> Result<PathBuf, CrossBuildError> {
     let editions = ["Enterprise", "Professional", "Community", "BuildTools"];
 
     for edition in &editions {
-        let link_path = base
-            .join(edition)
-            .join("VC")
-            .join("Tools")
-            .join("MSVC");
+        let link_path = base.join(edition).join("VC").join("Tools").join("MSVC");
 
         if let Ok(entries) = std::fs::read_dir(&link_path) {
             for entry in entries.flatten() {
-                let path = entry.path().join("bin").join("Hostx64").join(arch_dir).join("link.exe");
+                let path = entry
+                    .path()
+                    .join("bin")
+                    .join("Hostx64")
+                    .join(arch_dir)
+                    .join("link.exe");
                 if path.exists() {
                     return Ok(path);
                 }
@@ -209,7 +208,6 @@ impl LinkerProvider for ZigLinkerProvider {
         })?;
 
         let target_arg = format!("-target {}", target.triple);
-        Ok(LinkerResolution::new(zig_path.clone(), LinkerFlavor::Lld)
-            .with_args(vec![target_arg]))
+        Ok(LinkerResolution::new(zig_path.clone(), LinkerFlavor::Lld).with_args(vec![target_arg]))
     }
 }

@@ -122,7 +122,9 @@ impl Default for ToolchainResolution {
     }
 }
 
-pub fn find_rustup_toolchain(rustup_home: &str) -> Result<String, crossbuild_core::error::CrossBuildError> {
+pub fn find_rustup_toolchain(
+    rustup_home: &str,
+) -> Result<String, crossbuild_core::error::CrossBuildError> {
     let toolchains_dir = PathBuf::from(rustup_home).join("toolchains");
     if !toolchains_dir.exists() {
         return Err(crossbuild_core::error::CrossBuildError::SysrootNotFound {
@@ -131,12 +133,15 @@ pub fn find_rustup_toolchain(rustup_home: &str) -> Result<String, crossbuild_cor
     }
 
     // Read the default toolchain
-    let default_file = PathBuf::from(rustup_home).join("settings").join("default-toolchain");
+    let default_file = PathBuf::from(rustup_home)
+        .join("settings")
+        .join("default-toolchain");
     if default_file.exists() {
-        let content = std::fs::read_to_string(&default_file)
-            .map_err(|_| crossbuild_core::error::CrossBuildError::SysrootNotFound {
+        let content = std::fs::read_to_string(&default_file).map_err(|_| {
+            crossbuild_core::error::CrossBuildError::SysrootNotFound {
                 target: "rustup".to_string(),
-            })?;
+            }
+        })?;
         let toolchain = content.trim().to_string();
         if toolchains_dir.join(&toolchain).exists() {
             return Ok(toolchain);
@@ -144,12 +149,17 @@ pub fn find_rustup_toolchain(rustup_home: &str) -> Result<String, crossbuild_cor
     }
 
     // Fallback: find first stable toolchain
-    for entry in std::fs::read_dir(&toolchains_dir).map_err(|_| crossbuild_core::error::CrossBuildError::SysrootNotFound {
-        target: "rustup".to_string(),
-    })? {
-        let entry = entry.map_err(|_| crossbuild_core::error::CrossBuildError::SysrootNotFound {
+    for entry in std::fs::read_dir(&toolchains_dir).map_err(|_| {
+        crossbuild_core::error::CrossBuildError::SysrootNotFound {
             target: "rustup".to_string(),
-        })?;
+        }
+    })? {
+        let entry =
+            entry.map_err(
+                |_| crossbuild_core::error::CrossBuildError::SysrootNotFound {
+                    target: "rustup".to_string(),
+                },
+            )?;
         let name = entry.file_name().to_string_lossy().to_string();
         if name.contains("stable") || name.contains("1.") {
             return Ok(name);
@@ -166,7 +176,8 @@ mod tests {
 
     #[test]
     fn toolchain_config_creation() {
-        let target = crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
+        let target =
+            crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
         let config = ToolchainConfig::new(target.clone());
         assert_eq!(config.target, target);
     }

@@ -7,8 +7,7 @@ use crate::{
     config::CrossBuildConfig,
     error::CrossBuildError,
     model::{
-        BuildPlan, BuildRequest, CommandLine,
-        PlanStep, Profile, ProviderAction, TargetTriple,
+        BuildPlan, BuildRequest, CommandLine, PlanStep, Profile, ProviderAction, TargetTriple,
     },
     platform::{assess_target, detect_host},
     registry::ProviderRegistry,
@@ -141,8 +140,12 @@ impl Planner {
 
         // Build steps
         let steps = vec![
-            PlanStep::ValidateManifest { path: manifest_path.clone() },
-            PlanStep::ValidateTarget { target: target_triple.clone() },
+            PlanStep::ValidateManifest {
+                path: manifest_path.clone(),
+            },
+            PlanStep::ValidateTarget {
+                target: target_triple.clone(),
+            },
             PlanStep::DetectHost,
             PlanStep::ResolveProviders,
             PlanStep::PrepareEnvironment,
@@ -155,7 +158,9 @@ impl Planner {
         ];
 
         // Generate cache key
-        let cache_key = cache_manager.policy().cache_key(&workspace_root, &target_triple);
+        let cache_key = cache_manager
+            .policy()
+            .cache_key(&workspace_root, &target_triple);
 
         // Build provider actions from the complete resolution
         let provider_actions = build_provider_actions(&complete_resolution, &target_triple);
@@ -248,8 +253,7 @@ mod tests {
     use super::*;
     use crate::model::{BuildRequest, TargetTriple};
     use crate::provider::{
-        BuiltinToolchainProvider, RustupToolchainProvider, ZigToolchainProvider,
-        NoSysrootProvider,
+        BuiltinToolchainProvider, NoSysrootProvider, RustupToolchainProvider, ZigToolchainProvider,
     };
     use tempfile::tempdir;
 
@@ -257,9 +261,15 @@ mod tests {
     struct TestLinkerProvider;
 
     impl crate::provider::LinkerProvider for TestLinkerProvider {
-        fn name(&self) -> &'static str { "test-linker" }
-        fn priority(&self) -> i32 { 0 }
-        fn can_provide(&self, _target: &TargetTriple, _host: &crate::model::HostInfo) -> bool { true }
+        fn name(&self) -> &'static str {
+            "test-linker"
+        }
+        fn priority(&self) -> i32 {
+            0
+        }
+        fn can_provide(&self, _target: &TargetTriple, _host: &crate::model::HostInfo) -> bool {
+            true
+        }
         fn resolve(
             &self,
             _target: &TargetTriple,
@@ -282,20 +292,34 @@ mod tests {
     #[test]
     fn planner_resolves_native_target() {
         let mut planner = Planner::new();
-        planner.registry.register_toolchain(Box::new(BuiltinToolchainProvider));
-        planner.registry.register_toolchain(Box::new(RustupToolchainProvider));
-        planner.registry.register_toolchain(Box::new(ZigToolchainProvider));
-        planner.registry.register_sysroot(Box::new(NoSysrootProvider));
-        planner.registry.register_linker(Box::new(TestLinkerProvider));
+        planner
+            .registry
+            .register_toolchain(Box::new(BuiltinToolchainProvider));
+        planner
+            .registry
+            .register_toolchain(Box::new(RustupToolchainProvider));
+        planner
+            .registry
+            .register_toolchain(Box::new(ZigToolchainProvider));
+        planner
+            .registry
+            .register_sysroot(Box::new(NoSysrootProvider));
+        planner
+            .registry
+            .register_linker(Box::new(TestLinkerProvider));
 
         let dir = tempdir().unwrap();
         let manifest = dir.path().join("Cargo.toml");
-        std::fs::write(&manifest, r#"
+        std::fs::write(
+            &manifest,
+            r#"
 [package]
 name = "test"
 version = "0.1.0"
 edition = "2021"
-"#).unwrap();
+"#,
+        )
+        .unwrap();
 
         let host = crate::platform::detect_host().unwrap();
         let target = TargetTriple::parse(&host.host_triple.triple).unwrap();

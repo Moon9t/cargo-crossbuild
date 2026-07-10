@@ -6,8 +6,8 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::Result;
-use crossbuild_core::model::TargetTriple;
 use crossbuild_core::error::CrossBuildError;
+use crossbuild_core::model::TargetTriple;
 
 /// Cache policy configuration.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -124,7 +124,9 @@ pub struct CacheEntry {
     pub metadata: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 pub enum CacheEntryType {
     Download,
     Sysroot,
@@ -142,7 +144,10 @@ pub struct CacheManager {
 
 impl CacheManager {
     /// Creates a new cache manager.
-    pub fn new(policy: CachePolicy, workspace_root: impl AsRef<Path>) -> Result<Self, CrossBuildError> {
+    pub fn new(
+        policy: CachePolicy,
+        workspace_root: impl AsRef<Path>,
+    ) -> Result<Self, CrossBuildError> {
         let workspace_root = workspace_root.as_ref().to_path_buf();
         let root = policy.absolute_root(&workspace_root);
         fs::create_dir_all(&root).map_err(|source| CrossBuildError::Io {
@@ -150,25 +155,32 @@ impl CacheManager {
             source,
         })?;
 
-        fs::create_dir_all(policy.download_dir(&workspace_root)).map_err(|source| CrossBuildError::Io {
-            path: Some(policy.download_dir(&workspace_root)),
-            source,
+        fs::create_dir_all(policy.download_dir(&workspace_root)).map_err(|source| {
+            CrossBuildError::Io {
+                path: Some(policy.download_dir(&workspace_root)),
+                source,
+            }
         })?;
-        fs::create_dir_all(policy.sysroot_dir(&workspace_root)).map_err(|source| CrossBuildError::Io {
-            path: Some(policy.sysroot_dir(&workspace_root)),
-            source,
+        fs::create_dir_all(policy.sysroot_dir(&workspace_root)).map_err(|source| {
+            CrossBuildError::Io {
+                path: Some(policy.sysroot_dir(&workspace_root)),
+                source,
+            }
         })?;
-        fs::create_dir_all(policy.toolchain_dir(&workspace_root)).map_err(|source| CrossBuildError::Io {
-            path: Some(policy.toolchain_dir(&workspace_root)),
-            source,
+        fs::create_dir_all(policy.toolchain_dir(&workspace_root)).map_err(|source| {
+            CrossBuildError::Io {
+                path: Some(policy.toolchain_dir(&workspace_root)),
+                source,
+            }
         })?;
 
         let metadata_path = policy.metadata_path(&workspace_root);
         let metadata = if metadata_path.exists() {
-            let content = fs::read_to_string(&metadata_path).map_err(|source| CrossBuildError::Io {
-                path: Some(metadata_path),
-                source,
-            })?;
+            let content =
+                fs::read_to_string(&metadata_path).map_err(|source| CrossBuildError::Io {
+                    path: Some(metadata_path),
+                    source,
+                })?;
             serde_json::from_str(&content).unwrap_or_default()
         } else {
             CacheMetadata::default()
@@ -308,7 +320,9 @@ impl CacheManager {
         // Remove expired entries
         if let Some(max_age) = self.policy.max_age {
             let cutoff = now.saturating_sub(max_age.as_secs());
-            let expired: Vec<_> = self.metadata.entries
+            let expired: Vec<_> = self
+                .metadata
+                .entries
                 .iter()
                 .filter(|(_, entry)| entry.last_accessed < cutoff)
                 .map(|(k, _)| k.clone())
@@ -321,7 +335,10 @@ impl CacheManager {
                     }
                     report.removed_entries += 1;
                     report.freed_bytes += entry.size_bytes;
-                    self.metadata.total_size_bytes = self.metadata.total_size_bytes.saturating_sub(entry.size_bytes);
+                    self.metadata.total_size_bytes = self
+                        .metadata
+                        .total_size_bytes
+                        .saturating_sub(entry.size_bytes);
                 }
             }
         }
@@ -330,7 +347,9 @@ impl CacheManager {
         if let Some(max_size) = self.policy.max_size_bytes {
             if self.metadata.total_size_bytes > max_size {
                 // Sort by last accessed (LRU)
-                let mut entries: Vec<_> = self.metadata.entries
+                let mut entries: Vec<_> = self
+                    .metadata
+                    .entries
                     .iter()
                     .map(|(k, v)| (k.clone(), v.last_accessed, v.size_bytes, v.path.clone()))
                     .collect();
@@ -346,7 +365,10 @@ impl CacheManager {
                         }
                         report.removed_entries += 1;
                         report.freed_bytes += entry.size_bytes;
-                        self.metadata.total_size_bytes = self.metadata.total_size_bytes.saturating_sub(entry.size_bytes);
+                        self.metadata.total_size_bytes = self
+                            .metadata
+                            .total_size_bytes
+                            .saturating_sub(entry.size_bytes);
                     }
                 }
             }
@@ -498,7 +520,10 @@ mod tests {
     #[test]
     fn cache_policy_default() {
         let policy = CachePolicy::default();
-        assert_eq!(policy.root, PathBuf::from("target").join("crossbuild-cache"));
+        assert_eq!(
+            policy.root,
+            PathBuf::from("target").join("crossbuild-cache")
+        );
         assert_eq!(policy.max_size_bytes, Some(10 * 1024 * 1024 * 1024));
         assert_eq!(policy.max_age, Some(Duration::from_secs(30 * 24 * 60 * 60)));
     }
@@ -536,11 +561,9 @@ mod tests {
         fs::write(&source, b"test content").unwrap();
 
         // Store in cache
-        let cached = manager.store_download(
-            "https://example.com/file",
-            Some("sha256:abc123"),
-            &source,
-        ).unwrap();
+        let cached = manager
+            .store_download("https://example.com/file", Some("sha256:abc123"), &source)
+            .unwrap();
 
         assert!(cached.exists());
 
@@ -580,8 +603,8 @@ mod tests {
     #[test]
     fn cleanup_removes_old_entries() {
         let dir = tempdir().unwrap();
-        let policy = CachePolicy::new(dir.path().join("cache"))
-            .with_max_age(Duration::from_secs(60)); // 1 minute
+        let policy =
+            CachePolicy::new(dir.path().join("cache")).with_max_age(Duration::from_secs(60)); // 1 minute
         let mut manager = CacheManager::new(policy, dir.path()).unwrap();
 
         let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
@@ -594,7 +617,11 @@ mod tests {
         let cached = manager.store_sysroot(&target, "rustup", &sysroot).unwrap();
 
         // Manually set old timestamp
-        if let Some(entry) = manager.metadata.entries.get_mut(&manager.sysroot_key(&target, "rustup")) {
+        if let Some(entry) = manager
+            .metadata
+            .entries
+            .get_mut(&manager.sysroot_key(&target, "rustup"))
+        {
             entry.last_accessed = current_timestamp() - 120; // 2 minutes ago
         }
         manager.save_metadata().unwrap();

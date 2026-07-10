@@ -27,9 +27,7 @@ impl Environment {
             env_vars.extend(action.env.clone());
         }
 
-        let cargo_target_dir = env_vars
-            .get("CARGO_TARGET_DIR")
-            .map(PathBuf::from);
+        let cargo_target_dir = env_vars.get("CARGO_TARGET_DIR").map(PathBuf::from);
 
         Self {
             target: plan.target_triple().clone(),
@@ -82,7 +80,7 @@ mod tests {
         let target = TargetTriple::parse("aarch64-unknown-linux-gnu").unwrap();
         let host_triple = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
         let host = HostInfo {
-            host_triple: host_triple,
+            host_triple,
             os: crossbuild_core::model::OperatingSystem::Linux,
             arch: crossbuild_core::model::Architecture::X86_64,
             rustc_version: None,
@@ -91,7 +89,10 @@ mod tests {
         };
         let mut env = BTreeMap::new();
         env.insert("CARGO_TARGET_DIR".to_string(), "/tmp/cross".to_string());
-        env.insert("CC_aarch64-unknown-linux-gnu".to_string(), "aarch64-linux-gnu-gcc".to_string());
+        env.insert(
+            "CC_aarch64-unknown-linux-gnu".to_string(),
+            "aarch64-linux-gnu-gcc".to_string(),
+        );
 
         BuildPlan {
             request: BuildRequest::new(
@@ -127,10 +128,7 @@ mod tests {
         let env = Environment::from_plan(&plan);
         assert_eq!(env.target.triple, "aarch64-unknown-linux-gnu");
         assert!(env.env_vars.contains_key("CARGO_TARGET_DIR"));
-        assert_eq!(
-            env.env_vars.get("CARGO_TARGET_DIR").unwrap(),
-            "/tmp/cross"
-        );
+        assert_eq!(env.env_vars.get("CARGO_TARGET_DIR").unwrap(), "/tmp/cross");
     }
 
     #[test]

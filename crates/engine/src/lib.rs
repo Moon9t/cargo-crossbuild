@@ -1,8 +1,7 @@
 use std::time::Instant;
 
 use crossbuild_core::{
-    BuildPlan, BuildRequest, CrossBuildConfig, CrossBuildError, DiagnosticSink,
-    ExecutionReport,
+    BuildPlan, BuildRequest, CrossBuildConfig, CrossBuildError, DiagnosticSink, ExecutionReport,
 };
 use crossbuild_planner::Planner;
 use crossbuild_runner::Runner;
@@ -72,11 +71,15 @@ impl CrossBuildEngine {
         // Write cargo config if present
         if let Some(config_toml) = &plan.cargo_config {
             let config_path = plan.manifest_directory().join(".cargo").join("config.toml");
-            std::fs::create_dir_all(config_path.parent().expect("config path .cargo/config.toml always has parent"))
-                .map_err(|e| CrossBuildError::Io {
-                    path: Some(config_path.clone()),
-                    source: e,
-                })?;
+            std::fs::create_dir_all(
+                config_path
+                    .parent()
+                    .expect("config path .cargo/config.toml always has parent"),
+            )
+            .map_err(|e| CrossBuildError::Io {
+                path: Some(config_path.clone()),
+                source: e,
+            })?;
             let content = toml::to_string_pretty(config_toml)
                 .map_err(|e| CrossBuildError::configuration(e.to_string()))?;
             std::fs::write(&config_path, content).map_err(|e| CrossBuildError::Io {
@@ -118,7 +121,7 @@ impl CrossBuildEngine {
 mod tests {
     use super::*;
     use crossbuild_core::diagnostics::StderrDiagnosticSink;
-    use crossbuild_core::model::{BuildRequest, TargetTriple, ExecutionMode};
+    use crossbuild_core::model::{BuildRequest, ExecutionMode, TargetTriple};
     use tempfile::tempdir;
 
     #[test]
@@ -132,17 +135,21 @@ mod tests {
         let engine = CrossBuildEngine::new();
         let dir = tempdir().unwrap();
         let manifest = dir.path().join("Cargo.toml");
-        std::fs::write(&manifest, r#"
+        std::fs::write(
+            &manifest,
+            r#"
 [package]
 name = "test"
 version = "0.1.0"
 edition = "2021"
-"#).unwrap();
+"#,
+        )
+        .unwrap();
 
         let host = crossbuild_core::platform::detect_host().unwrap();
         let target = TargetTriple::parse(&host.host_triple.triple).unwrap();
-        let request = BuildRequest::new(manifest, target)
-            .with_execution_mode(ExecutionMode::DryRun);
+        let request =
+            BuildRequest::new(manifest, target).with_execution_mode(ExecutionMode::DryRun);
         let config = CrossBuildConfig::default();
         let mut sink = StderrDiagnosticSink::new(false);
 

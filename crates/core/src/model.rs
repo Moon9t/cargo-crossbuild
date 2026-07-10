@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-
 use crate::CrossBuildError;
 
 /// Error parsing a target triple component.
@@ -16,7 +15,11 @@ pub enum TargetParseError {
     #[error("target triple contains whitespace")]
     Whitespace,
     #[error("invalid target triple format: expected at least {expected_min} components, got {actual} for `{triple}`")]
-    InvalidFormat { triple: String, expected_min: usize, actual: usize },
+    InvalidFormat {
+        triple: String,
+        expected_min: usize,
+        actual: usize,
+    },
     #[error("unknown architecture: {0}")]
     UnknownArchitecture(String),
     #[error("unknown vendor: {0}")]
@@ -74,17 +77,21 @@ impl Architecture {
             | Architecture::Mips64
             | Architecture::LoongArch64
             | Architecture::Wasm64 => 64,
-            Architecture::X86
-            | Architecture::Arm
-            | Architecture::Wasm32 => 32,
+            Architecture::X86 | Architecture::Arm | Architecture::Wasm32 => 32,
             Architecture::Other(_) => 64,
         }
     }
 
     pub fn endianness(&self) -> Endianness {
         match self {
-            Architecture::X86_64 | Architecture::X86 | Architecture::Wasm32 | Architecture::Wasm64 => Endianness::Little,
-            Architecture::AArch64 | Architecture::Arm | Architecture::Arm64 | Architecture::RiscV64 => Endianness::Little,
+            Architecture::X86_64
+            | Architecture::X86
+            | Architecture::Wasm32
+            | Architecture::Wasm64 => Endianness::Little,
+            Architecture::AArch64
+            | Architecture::Arm
+            | Architecture::Arm64
+            | Architecture::RiscV64 => Endianness::Little,
             Architecture::PowerPC64 => Endianness::Little,
             Architecture::S390x => Endianness::Big,
             Architecture::Mips64 => Endianness::Big,
@@ -287,8 +294,9 @@ impl Display for OperatingSystem {
 }
 
 /// ABI (Application Binary Interface) specification.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Abi {
+    #[default]
     None,
     Gnu,
     Musl,
@@ -356,12 +364,6 @@ impl Abi {
 impl Display for Abi {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(self.name())
-    }
-}
-
-impl Default for Abi {
-    fn default() -> Self {
-        Abi::None
     }
 }
 
@@ -596,17 +598,12 @@ pub enum ExecutionMode {
 }
 
 /// Build profile configuration.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum Profile {
+    #[default]
     Dev,
     Release,
     Custom(&'static str),
-}
-
-impl Default for Profile {
-    fn default() -> Self {
-        Profile::Dev
-    }
 }
 
 impl Display for Profile {
@@ -740,7 +737,9 @@ impl HostInfo {
             }
         }
 
-        Err(HostDetectError::ParseError("host triple not found in rustc -vV output".to_string()))
+        Err(HostDetectError::ParseError(
+            "host triple not found in rustc -vV output".to_string(),
+        ))
     }
 
     fn detect_rustc_version() -> Option<String> {
@@ -867,8 +866,12 @@ impl CommandLine {
         self.env.insert(key.into(), value.into());
     }
 
-    pub fn extend_env(&mut self, env: impl IntoIterator<Item = (impl Into<String>, impl Into<String>)>) {
-        self.env.extend(env.into_iter().map(|(k, v)| (k.into(), v.into())));
+    pub fn extend_env(
+        &mut self,
+        env: impl IntoIterator<Item = (impl Into<String>, impl Into<String>)>,
+    ) {
+        self.env
+            .extend(env.into_iter().map(|(k, v)| (k.into(), v.into())));
     }
 }
 
@@ -1029,16 +1032,18 @@ impl StandardValidations {
     pub fn library(target: TargetTriple) -> ValidationPlan {
         ValidationPlan::new("library", target)
             .with_test_command(vec!["cargo".into(), "test".into(), "--lib".into()])
-            .with_artifacts(vec![
-                PathBuf::from("libtest.rlib"),
-                PathBuf::from("deps"),
-            ])
+            .with_artifacts(vec![PathBuf::from("libtest.rlib"), PathBuf::from("deps")])
     }
 
     /// Validation for a binary crate.
     pub fn binary(target: TargetTriple) -> ValidationPlan {
         ValidationPlan::new("binary", target)
-            .with_test_command(vec!["cargo".into(), "test".into(), "--bin".into(), "main".into()])
+            .with_test_command(vec![
+                "cargo".into(),
+                "test".into(),
+                "--bin".into(),
+                "main".into(),
+            ])
             .with_artifacts(vec![PathBuf::from("main")])
     }
 
@@ -1046,10 +1051,7 @@ impl StandardValidations {
     pub fn mixed(target: TargetTriple) -> ValidationPlan {
         ValidationPlan::new("mixed", target)
             .with_test_command(vec!["cargo".into(), "test".into()])
-            .with_artifacts(vec![
-                PathBuf::from("libtest.rlib"),
-                PathBuf::from("main"),
-            ])
+            .with_artifacts(vec![PathBuf::from("libtest.rlib"), PathBuf::from("main")])
     }
 
     /// Validation for no_std crate.
@@ -1209,7 +1211,9 @@ pub struct CacheEntry {
     pub metadata: BTreeMap<String, String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 pub enum CacheEntryType {
     Download,
     Sysroot,
@@ -1227,7 +1231,10 @@ pub struct CacheManager {
 
 impl CacheManager {
     /// Creates a new cache manager.
-    pub fn new(policy: CachePolicy, workspace_root: impl AsRef<Path>) -> Result<Self, CrossBuildError> {
+    pub fn new(
+        policy: CachePolicy,
+        workspace_root: impl AsRef<Path>,
+    ) -> Result<Self, CrossBuildError> {
         let workspace_root = workspace_root.as_ref().to_path_buf();
         let root = policy.absolute_root(&workspace_root);
         fs::create_dir_all(&root).map_err(|source| CrossBuildError::Io {
@@ -1235,25 +1242,32 @@ impl CacheManager {
             source,
         })?;
 
-        fs::create_dir_all(policy.download_dir(&workspace_root)).map_err(|source| CrossBuildError::Io {
-            path: Some(policy.download_dir(&workspace_root)),
-            source,
+        fs::create_dir_all(policy.download_dir(&workspace_root)).map_err(|source| {
+            CrossBuildError::Io {
+                path: Some(policy.download_dir(&workspace_root)),
+                source,
+            }
         })?;
-        fs::create_dir_all(policy.sysroot_dir(&workspace_root)).map_err(|source| CrossBuildError::Io {
-            path: Some(policy.sysroot_dir(&workspace_root)),
-            source,
+        fs::create_dir_all(policy.sysroot_dir(&workspace_root)).map_err(|source| {
+            CrossBuildError::Io {
+                path: Some(policy.sysroot_dir(&workspace_root)),
+                source,
+            }
         })?;
-        fs::create_dir_all(policy.toolchain_dir(&workspace_root)).map_err(|source| CrossBuildError::Io {
-            path: Some(policy.toolchain_dir(&workspace_root)),
-            source,
+        fs::create_dir_all(policy.toolchain_dir(&workspace_root)).map_err(|source| {
+            CrossBuildError::Io {
+                path: Some(policy.toolchain_dir(&workspace_root)),
+                source,
+            }
         })?;
 
         let metadata_path = policy.metadata_path(&workspace_root);
         let metadata = if metadata_path.exists() {
-            let content = fs::read_to_string(&metadata_path).map_err(|source| CrossBuildError::Io {
-                path: Some(metadata_path),
-                source,
-            })?;
+            let content =
+                fs::read_to_string(&metadata_path).map_err(|source| CrossBuildError::Io {
+                    path: Some(metadata_path),
+                    source,
+                })?;
             serde_json::from_str(&content).unwrap_or_default()
         } else {
             CacheMetadata::default()
@@ -1393,7 +1407,9 @@ impl CacheManager {
         // Remove expired entries
         if let Some(max_age) = self.policy.max_age {
             let cutoff = now - max_age.as_secs();
-            let expired: Vec<_> = self.metadata.entries
+            let expired: Vec<_> = self
+                .metadata
+                .entries
                 .iter()
                 .filter(|(_, entry)| entry.last_accessed < cutoff)
                 .map(|(k, _)| k.clone())
@@ -1406,7 +1422,10 @@ impl CacheManager {
                     }
                     report.removed_entries += 1;
                     report.freed_bytes += entry.size_bytes;
-                    self.metadata.total_size_bytes = self.metadata.total_size_bytes.saturating_sub(entry.size_bytes);
+                    self.metadata.total_size_bytes = self
+                        .metadata
+                        .total_size_bytes
+                        .saturating_sub(entry.size_bytes);
                 }
             }
         }
@@ -1415,7 +1434,9 @@ impl CacheManager {
         if let Some(max_size) = self.policy.max_size_bytes {
             if self.metadata.total_size_bytes > max_size {
                 // Sort by last accessed (LRU)
-                let mut entries: Vec<_> = self.metadata.entries
+                let mut entries: Vec<_> = self
+                    .metadata
+                    .entries
                     .iter()
                     .map(|(k, v)| (k.clone(), v.last_accessed, v.size_bytes, v.path.clone()))
                     .collect();
@@ -1431,7 +1452,10 @@ impl CacheManager {
                         }
                         report.removed_entries += 1;
                         report.freed_bytes += entry.size_bytes;
-                        self.metadata.total_size_bytes = self.metadata.total_size_bytes.saturating_sub(entry.size_bytes);
+                        self.metadata.total_size_bytes = self
+                            .metadata
+                            .total_size_bytes
+                            .saturating_sub(entry.size_bytes);
                     }
                 }
             }
@@ -1586,7 +1610,10 @@ mod tests {
     #[test]
     fn cache_policy_default() {
         let policy = CachePolicy::default();
-        assert_eq!(policy.root, PathBuf::from("target").join("crossbuild-cache"));
+        assert_eq!(
+            policy.root,
+            PathBuf::from("target").join("crossbuild-cache")
+        );
         assert_eq!(policy.max_size_bytes, Some(10 * 1024 * 1024 * 1024));
     }
 
@@ -1623,11 +1650,9 @@ mod tests {
         fs::write(&source, b"test content").unwrap();
 
         // Store in cache
-        let cached = manager.store_download(
-            "https://example.com/file",
-            Some("sha256:abc123"),
-            &source,
-        ).unwrap();
+        let cached = manager
+            .store_download("https://example.com/file", Some("sha256:abc123"), &source)
+            .unwrap();
 
         assert!(cached.exists());
 
@@ -1667,8 +1692,8 @@ mod tests {
     #[test]
     fn cleanup_removes_old_entries() {
         let dir = tempdir().unwrap();
-        let policy = CachePolicy::new(dir.path().join("cache"))
-            .with_max_age(Duration::from_secs(60)); // 1 minute
+        let policy =
+            CachePolicy::new(dir.path().join("cache")).with_max_age(Duration::from_secs(60)); // 1 minute
         let mut manager = CacheManager::new(policy, dir.path()).unwrap();
 
         let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
@@ -1681,7 +1706,11 @@ mod tests {
         let cached = manager.store_sysroot(&target, "rustup", &sysroot).unwrap();
 
         // Manually set old timestamp
-        if let Some(entry) = manager.metadata.entries.get_mut(&manager.sysroot_key(&target, "rustup")) {
+        if let Some(entry) = manager
+            .metadata
+            .entries
+            .get_mut(&manager.sysroot_key(&target, "rustup"))
+        {
             entry.last_accessed = current_timestamp() - 120; // 2 minutes ago
         }
         manager.save_metadata().unwrap();

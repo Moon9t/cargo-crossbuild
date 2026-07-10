@@ -4,10 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::{Context, Result};
-use crossbuild_core::{
-    config::CrossBuildConfig,
-    model::TargetTriple,
-};
+use crossbuild_core::{config::CrossBuildConfig, model::TargetTriple};
 
 /// Describes a planned installation destination.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -68,7 +65,10 @@ impl PackageManager {
                 ];
                 for (cmd, args) in managers {
                     if Command::new("which").arg(cmd).output().is_ok()
-                        && Command::new("which").arg(cmd).output().map_or(false, |o| o.status.success())
+                        && Command::new("which")
+                            .arg(cmd)
+                            .output()
+                            .is_ok_and(|o| o.status.success())
                     {
                         Command::new(cmd)
                             .args(*args)
@@ -135,7 +135,7 @@ impl PackageManager {
             .context("rustup target list output is not valid UTF-8")?;
         Ok(stdout
             .lines()
-            .map(|line| line.trim().split_whitespace().next().unwrap_or("").to_string())
+            .map(|line| line.split_whitespace().next().unwrap_or("").to_string())
             .filter(|s| !s.is_empty())
             .collect())
     }
@@ -268,13 +268,16 @@ impl ReleasePlan {
 mod tests {
     use super::*;
     use crossbuild_core::model::TargetTriple;
-    use crossbuild_core::WrapperPlan;
     use crossbuild_core::ValidationPlan;
+    use crossbuild_core::WrapperPlan;
 
     #[test]
     fn install_plan_creation() {
         let plan = InstallPlan::new("target/crossbuild");
-        assert_eq!(plan.destination, std::path::PathBuf::from("target/crossbuild"));
+        assert_eq!(
+            plan.destination,
+            std::path::PathBuf::from("target/crossbuild")
+        );
     }
 
     #[test]
@@ -283,12 +286,16 @@ mod tests {
         let install = InstallPlan::new("bin");
         let wrapper = WrapperPlan::new("cargo", "build");
         let target = TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap();
-        let validation = ValidationPlan::new("release-validation", target.clone()).with_release_mode(true);
+        let validation =
+            ValidationPlan::new("release-validation", target.clone()).with_release_mode(true);
         let package_manager = PackageManagerPlan::new("cargo");
 
         assert!(release.is_prerelease());
         assert_eq!(release.tag_name(), "v1.2.3-alpha.1");
-        assert_eq!(install.resolved_destination(&PathBuf::from("C:/workspace")), PathBuf::from("C:/workspace/bin"));
+        assert_eq!(
+            install.resolved_destination(&PathBuf::from("C:/workspace")),
+            PathBuf::from("C:/workspace/bin")
+        );
         assert_eq!(wrapper.invocation(), "cargo build");
         assert!(validation.requires_release_mode());
         assert_eq!(package_manager.command_name(), "cargo");

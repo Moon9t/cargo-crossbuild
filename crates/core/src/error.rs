@@ -26,16 +26,25 @@ pub enum CrossBuildError {
     ProviderFailed { provider: String, reason: String },
 
     #[error("no suitable {provider_type} provider found for target `{target}`")]
-    ProviderNotFound { provider_type: String, target: String },
+    ProviderNotFound {
+        provider_type: String,
+        target: String,
+    },
 
     #[error("build command `{command}` exited with status {exit_code:?}")]
-    BuildFailed { command: String, exit_code: Option<i32> },
+    BuildFailed {
+        command: String,
+        exit_code: Option<i32>,
+    },
 
     #[error("{message}")]
     Configuration { message: String },
 
-    #[error("I/O error at {}: {source}", path.as_ref().map(|p| format!("{}", p.display())).unwrap_or_else(|| String::new()))]
-    Io { path: Option<PathBuf>, source: io::Error },
+    #[error("I/O error at {}: {source}", path.as_ref().map(|p| format!("{}", p.display())).unwrap_or_else(String::new))]
+    Io {
+        path: Option<PathBuf>,
+        source: io::Error,
+    },
 
     #[error("required tool not found: {tool}")]
     ToolNotFound { tool: String },
@@ -47,7 +56,11 @@ pub enum CrossBuildError {
     SysrootNotFound { target: String },
 
     #[error("checksum verification failed for {url}: expected {expected}, got {actual}")]
-    ChecksumMismatch { url: String, expected: String, actual: String },
+    ChecksumMismatch {
+        url: String,
+        expected: String,
+        actual: String,
+    },
 
     #[error("download failed for {url}: {reason}")]
     DownloadFailed { url: String, reason: String },

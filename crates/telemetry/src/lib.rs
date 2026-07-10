@@ -44,7 +44,12 @@ impl TelemetryCollector {
     }
 
     /// Records an event.
-    pub fn record_event(&mut self, event_type: impl Into<String>, message: impl Into<String>, duration_ms: Option<u64>) {
+    pub fn record_event(
+        &mut self,
+        event_type: impl Into<String>,
+        message: impl Into<String>,
+        duration_ms: Option<u64>,
+    ) {
         let event = TelemetryEvent {
             timestamp: chrono::Utc::now().to_rfc3339(),
             event_type: event_type.into(),
@@ -62,7 +67,11 @@ impl TelemetryCollector {
 
     /// Records the end of a phase.
     pub fn phase_end(&mut self, phase: &str, duration: Duration) {
-        self.record_event("phase_end", format!("Completed {}", phase), Some(duration.as_millis() as u64));
+        self.record_event(
+            "phase_end",
+            format!("Completed {}", phase),
+            Some(duration.as_millis() as u64),
+        );
     }
 
     /// Records an error.
@@ -144,7 +153,9 @@ mod tests {
 
     #[test]
     fn telemetry_collection() {
-        let mut telemetry = TelemetryCollector::new(crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap());
+        let mut telemetry = TelemetryCollector::new(
+            crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap(),
+        );
         telemetry.phase_start("test");
         std::thread::sleep(std::time::Duration::from_millis(10));
         telemetry.phase_end("test", std::time::Duration::from_millis(50));
@@ -154,7 +165,9 @@ mod tests {
 
     #[test]
     fn phase_timer_works() {
-        let mut telemetry = TelemetryCollector::new(crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap());
+        let mut telemetry = TelemetryCollector::new(
+            crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap(),
+        );
         {
             let _timer = PhaseTimer::new(&mut telemetry, "test_phase");
             std::thread::sleep(std::time::Duration::from_millis(10));

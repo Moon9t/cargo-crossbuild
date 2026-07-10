@@ -8,10 +8,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use anyhow::Result;
-use crossbuild_core::{
-    cache::CachePolicy,
-    error::CrossBuildError,
-};
+use crossbuild_core::{cache::CachePolicy, error::CrossBuildError};
 
 /// Download request with optional verification.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -141,7 +138,9 @@ impl Downloader {
         let client = reqwest::blocking::Client::builder()
             .timeout(Duration::from_secs(300))
             .build()
-            .map_err(|e| CrossBuildError::configuration(format!("Failed to create HTTP client: {e}")))?;
+            .map_err(|e| {
+                CrossBuildError::configuration(format!("Failed to create HTTP client: {e}"))
+            })?;
 
         Ok(Self {
             client,
@@ -157,7 +156,10 @@ impl Downloader {
     }
 
     /// Downloads a file with verification.
-    pub fn download(&mut self, request: DownloadRequest) -> Result<DownloadResult, CrossBuildError> {
+    pub fn download(
+        &mut self,
+        request: DownloadRequest,
+    ) -> Result<DownloadResult, CrossBuildError> {
         // Create destination directory
         if let Some(parent) = request.destination.parent() {
             fs::create_dir_all(parent).map_err(|source| CrossBuildError::Io {
@@ -168,7 +170,9 @@ impl Downloader {
 
         // Check if already cached and verified
         if request.destination.exists() && request.is_verified() {
-            if let Ok(checksum) = self.compute_checksum(&request.destination, request.checksum_algorithm) {
+            if let Ok(checksum) =
+                self.compute_checksum(&request.destination, request.checksum_algorithm)
+            {
                 if checksum == request.expected_checksum.as_deref().unwrap_or("") {
                     return Ok(DownloadResult {
                         path: request.destination.clone(),
@@ -181,7 +185,8 @@ impl Downloader {
         }
 
         // Download
-        let mut response = self.client
+        let mut response = self
+            .client
             .get(&request.url)
             .timeout(request.timeout)
             .send()
@@ -211,19 +216,23 @@ impl Downloader {
         let mut hasher = self.create_hasher(request.checksum_algorithm);
 
         loop {
-            let bytes_read = response.read(&mut buffer).map_err(|e| CrossBuildError::DownloadFailed {
-                url: request.url.clone(),
-                reason: e.to_string(),
-            })?;
+            let bytes_read =
+                response
+                    .read(&mut buffer)
+                    .map_err(|e| CrossBuildError::DownloadFailed {
+                        url: request.url.clone(),
+                        reason: e.to_string(),
+                    })?;
 
             if bytes_read == 0 {
                 break;
             }
 
-            file.write_all(&buffer[..bytes_read]).map_err(|source| CrossBuildError::Io {
-                path: Some(temp_path.clone()),
-                source,
-            })?;
+            file.write_all(&buffer[..bytes_read])
+                .map_err(|source| CrossBuildError::Io {
+                    path: Some(temp_path.clone()),
+                    source,
+                })?;
 
             hasher.update(&buffer[..bytes_read]);
             downloaded += bytes_read as u64;
@@ -271,11 +280,8 @@ impl Downloader {
             source,
         })?;
 
-        let final_checksum = if request.expected_checksum.is_some() {
-            self.compute_checksum(&request.destination, request.checksum_algorithm)?
-        } else {
-            self.compute_checksum(&request.destination, request.checksum_algorithm)?
-        };
+        let final_checksum =
+            self.compute_checksum(&request.destination, request.checksum_algorithm)?;
 
         if let Some(ref mut callback) = self.progress_callback {
             callback(DownloadProgress {
@@ -302,7 +308,9 @@ impl Downloader {
         expected_checksum: Option<&str>,
         algorithm: ChecksumAlgorithm,
     ) -> Result<DownloadResult, CrossBuildError> {
-        let dest = self.cache_policy.download_dir(&PathBuf::from("."))
+        let dest = self
+            .cache_policy
+            .download_dir(&PathBuf::from("."))
             .join(cache_key);
         self.download(DownloadRequest::with_checksum(
             url,
@@ -320,11 +328,19 @@ impl Downloader {
         }
     }
 
-    fn finalize_checksum(&self, hasher: Box<dyn ChecksumHasher>, _algorithm: ChecksumAlgorithm) -> String {
+    fn finalize_checksum(
+        &self,
+        hasher: Box<dyn ChecksumHasher>,
+        _algorithm: ChecksumAlgorithm,
+    ) -> String {
         hasher.finalize()
     }
 
-    fn compute_checksum(&self, path: &Path, algorithm: ChecksumAlgorithm) -> Result<String, CrossBuildError> {
+    fn compute_checksum(
+        &self,
+        path: &Path,
+        algorithm: ChecksumAlgorithm,
+    ) -> Result<String, CrossBuildError> {
         let mut file = fs::File::open(path).map_err(|source| CrossBuildError::Io {
             path: Some(path.to_path_buf()),
             source,
@@ -334,10 +350,12 @@ impl Downloader {
         let mut buffer = vec![0u8; 8192];
 
         loop {
-            let bytes_read = file.read(&mut buffer).map_err(|source| CrossBuildError::Io {
-                path: Some(path.to_path_buf()),
-                source,
-            })?;
+            let bytes_read = file
+                .read(&mut buffer)
+                .map_err(|source| CrossBuildError::Io {
+                    path: Some(path.to_path_buf()),
+                    source,
+                })?;
             if bytes_read == 0 {
                 break;
             }

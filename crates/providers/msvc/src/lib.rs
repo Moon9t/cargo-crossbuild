@@ -59,15 +59,16 @@ fn find_msvc_link(arch: &Architecture) -> Result<PathBuf, CrossBuildError> {
     let editions = ["Enterprise", "Professional", "Community", "BuildTools"];
 
     for edition in &editions {
-        let link_path = base
-            .join(edition)
-            .join("VC")
-            .join("Tools")
-            .join("MSVC");
+        let link_path = base.join(edition).join("VC").join("Tools").join("MSVC");
 
         if let Ok(entries) = std::fs::read_dir(&link_path) {
             for entry in entries.flatten() {
-                let path = entry.path().join("bin").join("Hostx64").join(arch_dir).join("link.exe");
+                let path = entry
+                    .path()
+                    .join("bin")
+                    .join("Hostx64")
+                    .join(arch_dir)
+                    .join("link.exe");
                 if path.exists() {
                     return Ok(path);
                 }

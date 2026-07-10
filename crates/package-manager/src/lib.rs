@@ -3,9 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::Result;
-use crossbuild_core::{
-    config::CrossBuildConfig,
-};
+use crossbuild_core::config::CrossBuildConfig;
 
 /// Describes a planned installation destination.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -48,26 +46,35 @@ impl PackageManager {
     ) -> Result<(), anyhow::Error> {
         // This would integrate with system package managers (apt, dnf, pacman, etc.)
         // For now, just log what would be installed
-        println!("Would install packages for {}: {:?}", target.triple, packages);
+        println!(
+            "Would install packages for {}: {:?}",
+            target.triple, packages
+        );
         Ok(())
     }
 
     /// Checks if a system package is available.
-    pub fn is_package_available(&self, _name: &str, _target: &crossbuild_core::model::TargetTriple) -> bool {
+    pub fn is_package_available(
+        &self,
+        _name: &str,
+        _target: &crossbuild_core::model::TargetTriple,
+    ) -> bool {
         // In a real implementation, query the package manager
         true
     }
 
     /// Gets the package name for a target.
-    pub fn package_name_for_target(&self, name: &str, target: &crossbuild_core::model::TargetTriple) -> String {
+    pub fn package_name_for_target(
+        &self,
+        name: &str,
+        target: &crossbuild_core::model::TargetTriple,
+    ) -> String {
         match target.os {
-            crossbuild_core::model::OperatingSystem::Linux => {
-                match target.arch {
-                    crossbuild_core::model::Architecture::X86_64 => format!("{}:amd64", name),
-                    crossbuild_core::model::Architecture::AArch64 => format!("{}:arm64", name),
-                    _ => format!("{}:{}", name, target.arch.name()),
-                }
-            }
+            crossbuild_core::model::OperatingSystem::Linux => match target.arch {
+                crossbuild_core::model::Architecture::X86_64 => format!("{}:amd64", name),
+                crossbuild_core::model::Architecture::AArch64 => format!("{}:arm64", name),
+                _ => format!("{}:{}", name, target.arch.name()),
+            },
             _ => name.to_string(),
         }
     }
@@ -81,13 +88,19 @@ mod tests {
     #[test]
     fn install_plan_creation() {
         let plan = InstallPlan::new("target/crossbuild");
-        assert_eq!(plan.destination, std::path::PathBuf::from("target/crossbuild"));
+        assert_eq!(
+            plan.destination,
+            std::path::PathBuf::from("target/crossbuild")
+        );
     }
 
     #[test]
     fn package_manager_creation() {
         let config = crossbuild_core::config::CrossBuildConfig::default();
         let pm = PackageManager::new(config);
-        assert!(pm.is_package_available("openssl", &TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap()));
+        assert!(pm.is_package_available(
+            "openssl",
+            &TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap()
+        ));
     }
 }

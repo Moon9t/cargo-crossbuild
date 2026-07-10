@@ -3,7 +3,6 @@
 use std::fmt::{self, Display, Formatter};
 use std::io::{self, Write};
 
-
 /// Diagnostic severity used by the engine and CLI.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Severity {

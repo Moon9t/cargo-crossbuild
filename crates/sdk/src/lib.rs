@@ -55,10 +55,7 @@ pub struct PackageFile {
 impl SdkManager {
     /// Creates a new SDK manager.
     pub fn new(config: CrossBuildConfig) -> Result<Self> {
-        let cache_dir = config
-            .target_dir
-            .join("crossbuild-cache")
-            .join("sdk");
+        let cache_dir = config.target_dir.join("crossbuild-cache").join("sdk");
 
         std::fs::create_dir_all(&cache_dir)?;
 
@@ -89,7 +86,10 @@ impl SdkManager {
         let mut files = Vec::new();
         for file in &metadata.files {
             let path = self.cache_dir.join("packages").join(&file.path);
-            std::fs::create_dir_all(path.parent().expect("file path inside packages/ has parent directory"))?;
+            std::fs::create_dir_all(
+                path.parent()
+                    .expect("file path inside packages/ has parent directory"),
+            )?;
             self.download_file(file.path.to_str().unwrap_or_default(), &path, &file.hash)?;
             files.push(path);
         }
@@ -102,7 +102,11 @@ impl SdkManager {
             version: metadata.version.clone(),
             target: target.triple.clone(),
             install_path: install_path.clone(),
-            dependencies: metadata.dependencies.iter().map(|d| d.name.clone()).collect(),
+            dependencies: metadata
+                .dependencies
+                .iter()
+                .map(|d| d.name.clone())
+                .collect(),
             files: metadata.files.iter().map(|f| f.path.clone()).collect(),
         };
 
@@ -147,7 +151,9 @@ impl SdkManager {
         if hash != expected_hash {
             anyhow::bail!(
                 "Checksum mismatch for {}: expected {}, got {}",
-                url, expected_hash, hash
+                url,
+                expected_hash,
+                hash
             );
         }
 
@@ -157,7 +163,11 @@ impl SdkManager {
 
     /// Extracts a package archive.
     fn extract_package(&self, metadata: &PackageMetadata, _files: &[PathBuf]) -> Result<PathBuf> {
-        let install_dir = self.cache_dir.join("installed").join(&metadata.name).join(&metadata.version);
+        let install_dir = self
+            .cache_dir
+            .join("installed")
+            .join(&metadata.name)
+            .join(&metadata.version);
         std::fs::create_dir_all(&install_dir)?;
 
         // In a real implementation, extract archives
@@ -174,13 +184,21 @@ impl SdkManager {
     }
 
     /// Gets an installed package.
-    pub fn get_package(&self, name: &str, version: &str, target: &crossbuild_core::model::TargetTriple) -> Option<&InstalledPackage> {
+    pub fn get_package(
+        &self,
+        name: &str,
+        version: &str,
+        target: &crossbuild_core::model::TargetTriple,
+    ) -> Option<&InstalledPackage> {
         let key = format!("{}@{}::{}", name, version, target.triple);
         self.installed_packages.get(&key)
     }
 
     /// Lists all installed packages for a target.
-    pub fn list_packages(&self, target: &crossbuild_core::model::TargetTriple) -> Vec<&InstalledPackage> {
+    pub fn list_packages(
+        &self,
+        target: &crossbuild_core::model::TargetTriple,
+    ) -> Vec<&InstalledPackage> {
         self.installed_packages
             .values()
             .filter(|p| p.target == target.triple)
@@ -188,7 +206,12 @@ impl SdkManager {
     }
 
     /// Removes a package.
-    pub fn remove_package(&mut self, name: &str, version: &str, target: &crossbuild_core::model::TargetTriple) -> Result<()> {
+    pub fn remove_package(
+        &mut self,
+        name: &str,
+        version: &str,
+        target: &crossbuild_core::model::TargetTriple,
+    ) -> Result<()> {
         let key = format!("{}@{}::{}", name, version, target.triple);
         if self.installed_packages.remove(&key).is_some() {
             self.save_cache()?;
@@ -210,6 +233,12 @@ pub struct PackageSource {
     pub priority: i32,
 }
 
+impl Default for PackageRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PackageRegistry {
     pub fn new() -> Self {
         Self {
@@ -222,7 +251,12 @@ impl PackageRegistry {
         self.sources.sort_by_key(|s| -s.priority);
     }
 
-    pub fn find_package(&self, _name: &str, _version: &str, _target: &crossbuild_core::model::TargetTriple) -> Option<PackageMetadata> {
+    pub fn find_package(
+        &self,
+        _name: &str,
+        _version: &str,
+        _target: &crossbuild_core::model::TargetTriple,
+    ) -> Option<PackageMetadata> {
         for _source in &self.sources {
             // In real implementation, query the source
             // For now return None
@@ -250,7 +284,11 @@ mod tests {
         let mut manager = SdkManager::new(config).unwrap();
 
         // Test installing a package (will use mock metadata)
-        let result = manager.install_package("openssl", "1.1.1", &TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap());
+        let result = manager.install_package(
+            "openssl",
+            "1.1.1",
+            &TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap(),
+        );
 
         // Should succeed with mock metadata
         assert!(result.is_ok());

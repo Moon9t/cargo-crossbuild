@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use crate::model::TargetTriple;
 use crate::error::CrossBuildError;
+use crate::model::TargetTriple;
 
 /// Generates a .cargo/config.toml for cross-compilation.
 pub struct CargoConfigGenerator {
@@ -24,17 +24,29 @@ impl CargoConfigGenerator {
     }
 
     /// Sets the linker for the target.
-    pub fn with_linker(mut self, linker_path: impl Into<PathBuf>, flavor: &str, args: Vec<String>) -> Self {
+    pub fn with_linker(
+        mut self,
+        linker_path: impl Into<PathBuf>,
+        flavor: &str,
+        args: Vec<String>,
+    ) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
         let target_table = self.get_or_create_target_table(&target_key);
 
-        target_table.insert("linker".to_string(), toml::Value::String(linker_path.into().to_string_lossy().into_owned()));
-        target_table.insert("linker-flavor".to_string(), toml::Value::String(flavor.to_string()));
+        target_table.insert(
+            "linker".to_string(),
+            toml::Value::String(linker_path.into().to_string_lossy().into_owned()),
+        );
+        target_table.insert(
+            "linker-flavor".to_string(),
+            toml::Value::String(flavor.to_string()),
+        );
 
         if !args.is_empty() {
-            target_table.insert("linker-args".to_string(), toml::Value::Array(
-                args.into_iter().map(toml::Value::String).collect()
-            ));
+            target_table.insert(
+                "linker-args".to_string(),
+                toml::Value::Array(args.into_iter().map(toml::Value::String).collect()),
+            );
         }
 
         self
@@ -52,9 +64,10 @@ impl CargoConfigGenerator {
     pub fn with_rustflags(mut self, flags: Vec<String>) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
         let target_table = self.get_or_create_target_table(&target_key);
-        target_table.insert("rustflags".to_string(), toml::Value::Array(
-            flags.into_iter().map(toml::Value::String).collect()
-        ));
+        target_table.insert(
+            "rustflags".to_string(),
+            toml::Value::Array(flags.into_iter().map(toml::Value::String).collect()),
+        );
         self
     }
 
@@ -78,7 +91,10 @@ impl CargoConfigGenerator {
     pub fn with_sysroot(mut self, sysroot: impl Into<PathBuf>) -> Self {
         let target_key = format!("target.{}", self.target.as_str());
         let target_table = self.get_or_create_target_table(&target_key);
-        target_table.insert("sysroot".to_string(), toml::Value::String(sysroot.into().to_string_lossy().into_owned()));
+        target_table.insert(
+            "sysroot".to_string(),
+            toml::Value::String(sysroot.into().to_string_lossy().into_owned()),
+        );
         self
     }
 
@@ -93,8 +109,12 @@ impl CargoConfigGenerator {
     /// Sets the build target.
     pub fn with_build_target(mut self, target: &crate::model::TargetTriple) -> Self {
         let mut build_table = toml::Table::new();
-        build_table.insert("target".to_string(), toml::Value::String(target.as_str().to_string()));
-        self.config.insert("build".to_string(), toml::Value::Table(build_table));
+        build_table.insert(
+            "target".to_string(),
+            toml::Value::String(target.as_str().to_string()),
+        );
+        self.config
+            .insert("build".to_string(), toml::Value::Table(build_table));
         self
     }
 
@@ -251,24 +271,47 @@ mod tests {
             .with_runner("wasmtime")
             .build();
 
-        let target_table = config.get("target.wasm32-wasi").unwrap().as_table().unwrap();
-        assert_eq!(target_table.get("runner").unwrap().as_str().unwrap(), "wasmtime");
+        let target_table = config
+            .get("target.wasm32-wasi")
+            .unwrap()
+            .as_table()
+            .unwrap();
+        assert_eq!(
+            target_table.get("runner").unwrap().as_str().unwrap(),
+            "wasmtime"
+        );
     }
 
     #[test]
     fn merges_configs() {
         let mut config1 = toml::Table::new();
         let mut target1 = toml::Table::new();
-        target1.insert("linker".to_string(), toml::Value::String("ld.lld".to_string()));
-        config1.insert("target.x86_64-unknown-linux-gnu".to_string(), toml::Value::Table(target1));
+        target1.insert(
+            "linker".to_string(),
+            toml::Value::String("ld.lld".to_string()),
+        );
+        config1.insert(
+            "target.x86_64-unknown-linux-gnu".to_string(),
+            toml::Value::Table(target1),
+        );
 
         let mut config2 = toml::Table::new();
         let mut target2 = toml::Table::new();
-        target2.insert("runner".to_string(), toml::Value::String("qemu".to_string()));
-        config2.insert("target.x86_64-unknown-linux-gnu".to_string(), toml::Value::Table(target2));
+        target2.insert(
+            "runner".to_string(),
+            toml::Value::String("qemu".to_string()),
+        );
+        config2.insert(
+            "target.x86_64-unknown-linux-gnu".to_string(),
+            toml::Value::Table(target2),
+        );
 
         let merged = merge_cargo_configs(vec![config1, config2]);
-        let target = merged.get("target.x86_64-unknown-linux-gnu").unwrap().as_table().unwrap();
+        let target = merged
+            .get("target.x86_64-unknown-linux-gnu")
+            .unwrap()
+            .as_table()
+            .unwrap();
         assert_eq!(target.get("linker").unwrap().as_str().unwrap(), "ld.lld");
         assert_eq!(target.get("runner").unwrap().as_str().unwrap(), "qemu");
     }
@@ -284,7 +327,8 @@ mod tests {
             vec!["-C".into(), "linker=clang".into()],
             std::collections::BTreeMap::new(),
             &PathBuf::from("/workspace"),
-        ).unwrap();
+        )
+        .unwrap();
 
         assert!(config.contains_key("target.x86_64-unknown-linux-gnu"));
     }

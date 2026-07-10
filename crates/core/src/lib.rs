@@ -26,9 +26,11 @@ pub use model::{
     WrapperPlan,
 };
 pub use planner::Planner;
-pub use platform::{assess_target, detect_host, CapabilityMatrix, KnownTargets, rustup_target_available};
+pub use platform::{
+    assess_target, detect_host, rustup_target_available, CapabilityMatrix, KnownTargets,
+};
 pub use provider::{
-    LinkerFlavor, LinkerProvider, LinkerResolution, SysrootProvider, SysrootResolution,
-    ToolchainProvider, ToolchainResolution, BuiltinToolchainProvider, RustupToolchainProvider,
-    ZigToolchainProvider, NoSysrootProvider, RustupSysrootProvider, ZigSysrootProvider,
+    BuiltinToolchainProvider, LinkerFlavor, LinkerProvider, LinkerResolution, NoSysrootProvider,
+    RustupSysrootProvider, RustupToolchainProvider, SysrootProvider, SysrootResolution,
+    ToolchainProvider, ToolchainResolution, ZigSysrootProvider, ZigToolchainProvider,
 };

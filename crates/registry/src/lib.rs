@@ -13,7 +13,9 @@ use crossbuild_provider_gcc::{
     ZigLinkerProvider,
 };
 use crossbuild_provider_sysroot::{NoSysrootProvider, RustupSysrootProvider, ZigSysrootProvider};
-use crossbuild_provider_zig::{BuiltinToolchainProvider, RustupToolchainProvider, ZigToolchainProvider};
+use crossbuild_provider_zig::{
+    BuiltinToolchainProvider, RustupToolchainProvider, ZigToolchainProvider,
+};
 
 #[derive(Default)]
 pub struct ProviderRegistry {

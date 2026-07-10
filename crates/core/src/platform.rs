@@ -3,8 +3,8 @@
 use std::collections::BTreeMap;
 
 use crate::model::{
-    Abi, HostDetectError, HostInfo, LinkerHint, OperatingSystem, SysrootHint,
-    TargetFamily, TargetInfo, TargetSupport, TargetTriple, ToolchainHint,
+    Abi, HostDetectError, HostInfo, LinkerHint, OperatingSystem, SysrootHint, TargetFamily,
+    TargetInfo, TargetSupport, TargetTriple, ToolchainHint,
 };
 
 /// Detects the host platform information.
@@ -115,11 +115,7 @@ fn suggest_toolchain_provider(
     match support {
         TargetSupport::Tier1 | TargetSupport::Tier2 => {
             // For tier 1/2, prefer rustup if available
-            if rustup_target_available(target) {
-                ToolchainHint::Rustup
-            } else if target.is_wasm() {
-                ToolchainHint::Rustup
-            } else if target.is_bare_metal() {
+            if rustup_target_available(target) || target.is_wasm() || target.is_bare_metal() {
                 ToolchainHint::Rustup
             } else {
                 ToolchainHint::Zig
@@ -187,7 +183,7 @@ fn suggest_sysroot_provider(
 
 /// Suggests the best linker for a target.
 fn suggest_linker(target: &TargetTriple, host: &HostInfo) -> LinkerHint {
-    match (target.family(), target.os.clone(), target.abi.clone()) {
+    match (target.family(), target.os.clone(), target.abi) {
         // Windows targets
         (TargetFamily::Windows, _, Abi::Msvc) => LinkerHint::MSVC,
         (TargetFamily::Windows, _, Abi::Gnu) => LinkerHint::Lld,
@@ -205,9 +201,11 @@ fn suggest_linker(target: &TargetTriple, host: &HostInfo) -> LinkerHint {
 
         // macOS targets
         (TargetFamily::MacOs, OperatingSystem::MacOs, _) => LinkerHint::Lld,
-        (TargetFamily::MacOs, OperatingSystem::Ios | OperatingSystem::TvOS | OperatingSystem::WatchOS, _) => {
-            LinkerHint::Lld
-        }
+        (
+            TargetFamily::MacOs,
+            OperatingSystem::Ios | OperatingSystem::TvOS | OperatingSystem::WatchOS,
+            _,
+        ) => LinkerHint::Lld,
 
         // WASM targets
         (TargetFamily::Wasm, _, _) => LinkerHint::Lld,

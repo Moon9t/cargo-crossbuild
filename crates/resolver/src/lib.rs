@@ -4,7 +4,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use crossbuild_core::{
-    model::{BuildPlan, RunReport, PlanStep},
+    model::{BuildPlan, PlanStep, RunReport},
     CrossBuildConfig,
 };
 use tokio::sync::Semaphore;
@@ -168,7 +168,10 @@ impl ExecutionGraph {
 
     /// Gets the reverse dependencies (tasks that depend on this task).
     pub fn get_dependents(&self, task_id: &str) -> Vec<String> {
-        self.reverse_adjacency.get(task_id).cloned().unwrap_or_default()
+        self.reverse_adjacency
+            .get(task_id)
+            .cloned()
+            .unwrap_or_default()
     }
 }
 
@@ -216,10 +219,17 @@ impl Resolver {
             }
 
             // Acquire semaphore for parallelism control
-            let permit = self.task_semaphore.clone().acquire_owned().await.expect("semaphore should not be closed");
+            let permit = self
+                .task_semaphore
+                .clone()
+                .acquire_owned()
+                .await
+                .expect("semaphore should not be closed");
 
             let task = graph.get_task(&task_id).ok_or_else(|| {
-                crossbuild_core::CrossBuildError::configuration(format!("task {task_id} not found in execution graph"))
+                crossbuild_core::CrossBuildError::configuration(format!(
+                    "task {task_id} not found in execution graph"
+                ))
             })?;
             let step = task.step.clone();
 
@@ -238,7 +248,11 @@ impl Resolver {
             match result {
                 Ok(Ok(())) => {}
                 Ok(Err(e)) => return Err(e),
-                Err(e) => return Err(crossbuild_core::CrossBuildError::configuration(e.to_string())),
+                Err(e) => {
+                    return Err(crossbuild_core::CrossBuildError::configuration(
+                        e.to_string(),
+                    ))
+                }
             }
         }
 
@@ -303,8 +317,13 @@ mod tests {
             ),
             command: crossbuild_core::model::CommandLine::new("cargo", PathBuf::from(".")),
             steps: vec![
-                crossbuild_core::model::PlanStep::ValidateManifest { path: std::path::PathBuf::from("Cargo.toml") },
-                crossbuild_core::model::PlanStep::ValidateTarget { target: crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu").unwrap() },
+                crossbuild_core::model::PlanStep::ValidateManifest {
+                    path: std::path::PathBuf::from("Cargo.toml"),
+                },
+                crossbuild_core::model::PlanStep::ValidateTarget {
+                    target: crossbuild_core::model::TargetTriple::parse("x86_64-unknown-linux-gnu")
+                        .unwrap(),
+                },
                 crossbuild_core::model::PlanStep::DetectHost,
                 crossbuild_core::model::PlanStep::ResolveProviders,
                 crossbuild_core::model::PlanStep::PrepareEnvironment,
@@ -343,7 +362,9 @@ mod tests {
             ),
             command: crossbuild_core::model::CommandLine::new("cargo", PathBuf::from(".")),
             steps: vec![
-                PlanStep::ValidateManifest { path: PathBuf::from("Cargo.toml") },
+                PlanStep::ValidateManifest {
+                    path: PathBuf::from("Cargo.toml"),
+                },
                 PlanStep::DetectHost,
                 PlanStep::ResolveProviders,
             ],
