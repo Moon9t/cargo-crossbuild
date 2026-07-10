@@ -1,0 +1,90 @@
+name: Release to crates.io
+
+on:
+  push:
+    tags: ["v*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Verify tag matches workspace version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VER=$(cargo metadata --no-deps --format-version=1 | jq -r '.packages[0].version')
+          if [ "$TAG" != "$VER" ]; then
+            echo "::error::Tag version ($TAG) does not match workspace version ($VER)"
+            exit 1
+          fi
+          echo "Tag $TAG matches workspace version $VER"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes
+
+      - name: Publish crates to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          CRATES=(
+            crossbuild-core
+            crossbuild-cache
+            crossbuild-diagnostics
+            crossbuild-platform
+            crossbuild-wrappers
+            crossbuild-lockfile
+            crossbuild-sdk
+            crossbuild-downloader
+            crossbuild-toolchain
+            crossbuild-package-manager
+            crossbuild-telemetry
+            crossbuild-resolver
+            crossbuild-environment
+            crossbuild-runner
+            crossbuild-provider-clang
+            crossbuild-provider-gcc
+            crossbuild-provider-msvc
+            crossbuild-provider-sysroot
+            crossbuild-provider-zig
+            crossbuild-registry
+            crossbuild-installer
+            crossbuild-planner
+            crossbuild-engine
+            cargo-crossbuild-cli
+          )
+
+          for crate in "${CRATES[@]}"; do
+            echo "::group::Publishing $crate"
+            RETRIES=0
+            MAX_RETRIES=6
+            while [ $RETRIES -lt $MAX_RETRIES ]; do
+              RETRIES=$((RETRIES + 1))
+              if cargo publish -p "$crate"; then
+                echo "✓ $crate published"
+                break
+              fi
+
+              # Check if rate limited
+              if [ $RETRIES -lt $MAX_RETRIES ]; then
+                echo "Rate limited or failed. Waiting 10 minutes before retry (attempt $RETRIES/$MAX_RETRIES)..."
+                sleep 620
+              else
+                echo "::error::Failed to publish $crate after $MAX_RETRIES attempts"
+                exit 1
+              fi
+            done
+            echo "::endgroup::"
+          done
+
+          echo "All 24 crates published successfully!"
