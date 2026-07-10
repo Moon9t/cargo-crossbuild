@@ -1,0 +1,11 @@
+[package]
+name = "crossbuild-runner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-environment = { path = "../environment" }
+crossbuild-wrappers = { path = "../wrappers" }
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["full"] }

@@ -1,0 +1,15 @@
+[package]
+name = "crossbuild-registry"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-provider-zig = { path = "../providers/zig" }
+crossbuild-provider-gcc = { path = "../providers/gcc" }
+crossbuild-provider-clang = { path = "../providers/clang" }
+crossbuild-provider-msvc = { path = "../providers/msvc" }
+crossbuild-provider-sysroot = { path = "../providers/sysroot" }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }

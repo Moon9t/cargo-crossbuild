@@ -1,0 +1,17 @@
+[package]
+name = "crossbuild-downloader"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-cache = { path = "../cache" }
+anyhow = { workspace = true }
+reqwest = { workspace = true, features = ["blocking", "rustls-tls"] }
+sha2 = { workspace = true }
+hex = { workspace = true }
+blake3 = { workspace = true }
+indicatif = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

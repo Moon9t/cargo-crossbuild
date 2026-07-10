@@ -1,0 +1,13 @@
+[package]
+name = "crossbuild-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-planner = { path = "../planner" }
+crossbuild-runner = { path = "../runner" }
+toml = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

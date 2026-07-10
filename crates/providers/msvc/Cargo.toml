@@ -1,0 +1,9 @@
+[package]
+name = "crossbuild-provider-msvc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../../core" }
+anyhow = { workspace = true }
+which = { workspace = true }

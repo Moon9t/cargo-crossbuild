@@ -1,0 +1,10 @@
+{
+  "openssl@1.1.1::x86_64-unknown-linux-gnu": {
+    "name": "openssl",
+    "version": "1.1.1",
+    "target": "x86_64-unknown-linux-gnu",
+    "install_path": "target\\crossbuild\\crossbuild-cache\\sdk\\installed\\openssl\\1.1.1",
+    "dependencies": [],
+    "files": []
+  }
+}

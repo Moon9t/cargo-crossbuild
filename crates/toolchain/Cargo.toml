@@ -1,0 +1,13 @@
+[package]
+name = "crossbuild-toolchain"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-cache = { path = "../cache" }
+crossbuild-downloader = { path = "../downloader" }
+crossbuild-installer = { path = "../installer" }
+anyhow = { workspace = true }
+which = { workspace = true }
+toml = "0.8"

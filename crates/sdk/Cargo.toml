@@ -1,0 +1,16 @@
+[package]
+name = "crossbuild-sdk"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+reqwest = { workspace = true, features = ["blocking", "rustls-tls"] }
+
+[dev-dependencies]
+tempfile = { workspace = true }

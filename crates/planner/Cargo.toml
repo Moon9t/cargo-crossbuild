@@ -1,0 +1,22 @@
+[package]
+name = "crossbuild-planner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-registry = { path = "../registry" }
+crossbuild-cache = { path = "../cache" }
+crossbuild-downloader = { path = "../downloader" }
+crossbuild-installer = { path = "../installer" }
+crossbuild-environment = { path = "../environment" }
+crossbuild-wrappers = { path = "../wrappers" }
+crossbuild-provider-zig = { path = "../providers/zig" }
+crossbuild-provider-gcc = { path = "../providers/gcc" }
+crossbuild-provider-clang = { path = "../providers/clang" }
+crossbuild-provider-msvc = { path = "../providers/msvc" }
+crossbuild-provider-sysroot = { path = "../providers/sysroot" }
+anyhow = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

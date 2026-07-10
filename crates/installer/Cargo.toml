@@ -1,0 +1,13 @@
+[package]
+name = "crossbuild-installer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-cache = { path = "../cache" }
+crossbuild-downloader = { path = "../downloader" }
+anyhow = { workspace = true }
+fs_extra = { workspace = true }
+tar = "0.4"
+flate2 = "1.0"

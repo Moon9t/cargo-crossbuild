@@ -1,0 +1,11 @@
+[package]
+name = "crossbuild-package-manager"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+crossbuild-sdk = { path = "../sdk" }
+anyhow = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }

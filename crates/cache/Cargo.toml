@@ -1,0 +1,17 @@
+[package]
+name = "crossbuild-cache"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossbuild-core = { path = "../core" }
+anyhow = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+blake3 = { workspace = true }
+walkdir = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

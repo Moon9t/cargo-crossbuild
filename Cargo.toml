@@ -1,6 +1,58 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/cargo-crossbuild-core",
-    "crates/cargo-crossbuild-cli",
+    "crates/cache",
+    "crates/cli",
+    "crates/core",
+    "crates/diagnostics",
+    "crates/downloader",
+    "crates/engine",
+    "crates/environment",
+    "crates/installer",
+    "crates/lockfile",
+    "crates/package-manager",
+    "crates/planner",
+    "crates/platform",
+    "crates/providers/clang",
+    "crates/providers/gcc",
+    "crates/providers/msvc",
+    "crates/providers/sysroot",
+    "crates/providers/zig",
+    "crates/registry",
+    "crates/resolver",
+    "crates/runner",
+    "crates/sdk",
+    "crates/telemetry",
+    "crates/toolchain",
+    "crates/wrappers",
 ]
+
+[workspace.dependencies]
+anyhow = { version = "1.0", features = ["backtrace"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+semver = "1.0"
+thiserror = "1.0"
+walkdir = "2"
+which = "6"
+fs_extra = "1.3"
+sha2 = "0.10"
+hex = "0.4"
+tempfile = "3"
+chrono = { version = "0.4", features = ["serde"] }
+url = "2"
+reqwest = { version = "0.12", features = ["blocking", "rustls-tls"] }
+indicatif = "0.17"
+clap = { version = "4.5", features = ["derive"] }
+clap_complete = "4.5"
+colored = "2"
+tokio = { version = "1", features = ["full"] }
+tar = "0.4"
+flate2 = "1.0"
+blake3 = "1.5"
+bincode = "1.3"
+serde_cbor = "0.11"
+xxhash-rust = { version = "0.8", features = ["xxh3"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
